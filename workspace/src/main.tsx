@@ -40,8 +40,8 @@ function VersionModal({ isOpen, onClose }: { isOpen: boolean; onClose: () => voi
           <div className="versionModalTitleGroup">
             <span className="versionPill">v{versionData.version}</span>
             <div>
-              <h3>Informações da Versão</h3>
-              <small>Detalhes do build e commit atual</small>
+              <h3>Informações da Versão e Commit</h3>
+              <small>Detalhes do build implantado no GitHub</small>
             </div>
           </div>
           <button className="versionCloseBtn" onClick={onClose} aria-label="Fechar modal">✕</button>
@@ -74,7 +74,7 @@ function VersionModal({ isOpen, onClose }: { isOpen: boolean; onClose: () => voi
 
           {versionData.changelog && versionData.changelog.length > 0 && (
             <div className="changelogSection">
-              <span className="versionLabel">HISTÓRICO RECENTE DE VERSÕES</span>
+              <span className="versionLabel">HISTÓRICO RECENTE DE COMMITS & VERSÕES</span>
               <div className="changelogList">
                 {versionData.changelog.map((item, idx) => (
                   <div key={idx} className="changelogItem">
@@ -130,7 +130,7 @@ function App() {
       <div className="stageBox"><span>ETAPA ATUAL</span><b>Clareza</b><ProgressBar value={42}/><small>42% concluído</small></div>
       <div className="user"><span>M</span><div><b>Matheus Silva</b><small>Dentista</small></div></div>
       <div className="sidebarFooterVersion">
-        <button className="versionTriggerBtn" onClick={() => setShowVersionModal(true)} title="Ver detalhes da versão e commit">
+        <button className="versionTriggerBtn" onClick={() => setShowVersionModal(true)} title="Ver detalhes da versão e mensagem do commit">
           <span className="dotActive">●</span>
           <span>v{versionData.version}</span>
           <small>Ver mais →</small>
@@ -139,6 +139,20 @@ function App() {
     </aside>
 
     <main className="main">
+      {/* Top Banner with Version and Commit Message */}
+      <div className="topVersionBanner" onClick={() => setShowVersionModal(true)} role="button" tabIndex={0} title="Clique para ver os detalhes completos da versão">
+        <div className="topVersionBadge">
+          <span className="dotPulse" />
+          <b>v{versionData.version}</b>
+        </div>
+        <div className="topVersionMessage">
+          <strong>Commit Atual:</strong> <span>{versionData.commitMessage}</span>
+        </div>
+        <button className="topVersionButton" onClick={(e) => { e.stopPropagation(); setShowVersionModal(true); }}>
+          Ver mais ↗
+        </button>
+      </div>
+
       <header>
         <span className="headerTitle">Dentista de Propósito</span>
         <div className="headerActionsRow">
@@ -162,6 +176,14 @@ function App() {
         {section === "profile" && <Profile />}
       </div>
     </main>
+
+    {/* Floating quick-access badge button on bottom right */}
+    <button className="floatingVersionBadge" onClick={() => setShowVersionModal(true)} title="Clique para ver o commit e versão">
+      <span className="dotPulse" />
+      <span className="floatingVerText">v{versionData.version}</span>
+      <span className="floatingCommitText">{versionData.commitMessage.slice(0, 32)}...</span>
+      <span className="floatingAction">Ver mais</span>
+    </button>
 
     <VersionModal isOpen={showVersionModal} onClose={() => setShowVersionModal(false)} />
   </div>;
