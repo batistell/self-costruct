@@ -12,9 +12,15 @@ export interface AttachedFile {
   data: string;
 }
 
+export interface HistoryMessage {
+  role: "user" | "assistant";
+  text: string;
+}
+
 export interface AgentInput {
   message: string;
   files?: AttachedFile[];
+  history?: HistoryMessage[];
 }
 
 export interface ActivityItem {
@@ -154,6 +160,7 @@ export async function runAgent(
 ) {
   const message = typeof input === "string" ? input : (input?.message || "");
   const files = typeof input === "string" ? [] : (input?.files ?? []);
+  const history = typeof input === "object" && Array.isArray(input.history) ? input.history : [];
 
   const userParts: any[] = [];
   if (message.trim()) {
@@ -213,7 +220,32 @@ export async function runAgent(
     userParts.push({ text: "Olá" });
   }
 
-  const contents: any[] = [{ role: "user", parts: userParts }];
+  const contents: any[] = [];
+
+  // Incorporate recent conversation history to provide conversational memory
+  if (history.length > 0) {
+    const recentHistory = history.filter((h) => h.text && h.text.trim()).slice(-12);
+    for (const h of recentHistory) {
+      const geminiRole = h.role === "assistant" ? "model" : "user";
+      const lastContent = contents[contents.length - 1];
+      if (lastContent && lastContent.role === geminiRole) {
+        lastContent.parts.push({ text: h.text });
+      } else {
+        contents.push({
+          role: geminiRole,
+          parts: [{ text: h.text }],
+        });
+      }
+    }
+  }
+
+  const lastContent = contents[contents.length - 1];
+  if (lastContent && lastContent.role === "user") {
+    lastContent.parts.push(...userParts);
+  } else {
+    contents.push({ role: "user", parts: userParts });
+  }
+
   const activities: ActivityItem[] = [];
 
   onEvent?.({ type: "status", message: "Iniciando análise com a IA..." });
