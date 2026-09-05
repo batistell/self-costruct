@@ -17,11 +17,41 @@ app.get("/health", (_req, res) => res.json({ ok: true }));
 app.post("/api/chat", async (req, res) => {
   const message = String(req.body?.message ?? "").trim();
   if (!message) return res.status(400).json({ error: "message is required" });
+
+  const wantsStream =
+    req.headers.accept?.includes("text/event-stream") ||
+    req.query.stream === "true" ||
+    req.body?.stream === true;
+
+  if (wantsStream) {
+    res.setHeader("Content-Type", "text/event-stream");
+    res.setHeader("Cache-Control", "no-cache, no-transform");
+    res.setHeader("Connection", "keep-alive");
+    res.flushHeaders?.();
+
+    const sendEvent = (event: unknown) => {
+      res.write(`data: ${JSON.stringify(event)}\n\n`);
+    };
+
+    try {
+      await runAgent(message, (evt) => sendEvent(evt));
+      res.end();
+    } catch (error) {
+      console.error("[backend/stream]", error);
+      sendEvent({
+        type: "error",
+        message: error instanceof Error ? error.message : String(error),
+      });
+      res.end();
+    }
+    return;
+  }
+
   try {
     const result = await runAgent(message);
     res.json(result);
   } catch (error) {
-    console.error(error);
+    console.error("[backend]", error);
     res.status(500).json({ error: error instanceof Error ? error.message : String(error) });
   }
 });
