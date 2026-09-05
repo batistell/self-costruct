@@ -39,6 +39,14 @@ export type H2DbInfo = {
   lastSaved?: string;
 };
 
+const DEFAULT_INITIAL_MESSAGES: Message[] = [
+  {
+    id: "initial",
+    role: "assistant",
+    text: "Self Construct online. Diga-me o que alterar ou anexe arquivos e imagens; vou inspecionar o repositório, editar o GitHub em tempo real e implantar o commit resultante.",
+  },
+];
+
 function getToolBadge(tool: string) {
   switch (tool) {
     case "github_write_file":
@@ -249,13 +257,8 @@ function MessageAttachmentsView({ attachments }: { attachments: AttachedFile[] }
 }
 
 export default function App() {
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      id: "initial",
-      role: "assistant",
-      text: "Self Construct online. Diga-me o que alterar ou anexe arquivos e imagens; vou inspecionar o repositório, editar o GitHub em tempo real e implantar o commit resultante.",
-    },
-  ]);
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [isLoadingChat, setIsLoadingChat] = useState(true);
   const [input, setInput] = useState("");
   const [attachments, setAttachments] = useState<AttachedFile[]>([]);
   const [busy, setBusy] = useState(false);
@@ -272,25 +275,39 @@ export default function App() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Load messages from H2 Database File whenever the site opens or reloads
+  // Load messages from H2 Database File whenever the site opens or reloads before rendering
   useEffect(() => {
     let isMounted = true;
 
     async function loadFromH2() {
       try {
         const response = await fetch("/api/messages");
-        if (!response.ok) return;
-        const data = await response.json();
-        if (isMounted) {
-          if (Array.isArray(data.messages) && data.messages.length > 0) {
-            setMessages(data.messages);
+        if (response.ok) {
+          const data = await response.json();
+          if (isMounted) {
+            if (Array.isArray(data.messages) && data.messages.length > 0) {
+              setMessages(data.messages);
+            } else {
+              setMessages(DEFAULT_INITIAL_MESSAGES);
+            }
+            if (data.info) {
+              setH2Info(data.info);
+            }
           }
-          if (data.info) {
-            setH2Info(data.info);
+        } else {
+          if (isMounted) {
+            setMessages(DEFAULT_INITIAL_MESSAGES);
           }
         }
       } catch (err) {
         console.warn("[H2 Database] Não foi possível carregar mensagens salvas do arquivo:", err);
+        if (isMounted) {
+          setMessages(DEFAULT_INITIAL_MESSAGES);
+        }
+      } finally {
+        if (isMounted) {
+          setIsLoadingChat(false);
+        }
       }
     }
 
@@ -302,8 +319,10 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages, busy, attachments]);
+    if (!isLoadingChat) {
+      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [messages, busy, attachments, isLoadingChat]);
 
   const processFiles = (fileList: FileList | File[]) => {
     const filesArray = Array.from(fileList);
@@ -632,13 +651,21 @@ export default function App() {
     } catch (err) {
       console.error("[H2 Database] Erro ao limpar histórico:", err);
     }
-    setMessages([
-      {
-        id: `init_${Date.now()}`,
-        role: "assistant",
-        text: "Histórico limpo. Diga-me o que gostaria de alterar no projeto ou envie arquivos/imagens.",
-      },
-    ]);
+    setMessages(DEFAULT_INITIAL_MESSAGES);
+  }
+
+  if (isLoadingChat) {
+    return (
+      <div className="appLoadingScreen">
+        <div className="appLoadingCard">
+          <div className="appLoadingLogo">
+            <span className="appLoadingSpinner" />
+          </div>
+          <strong className="appLoadingTitle">SELF CONSTRUCT</strong>
+          <span className="appLoadingSub">Carregando histórico do chat...</span>
+        </div>
+      </div>
+    );
   }
 
   return (
