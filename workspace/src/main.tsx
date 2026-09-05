@@ -143,7 +143,7 @@ const defaultTasks: Task[] = [
 ];
 
 function ProgressBar({ value, color }: { value: number; color?: string }) {
-  const barColor = color ? color : value >= 80 ? "#16a34a" : value >= 60 ? "#2563eb" : "#eab308";
+  const barColor = color ? color : value >= 80 ? "#10b981" : value >= 60 ? "#059669" : "#eab308";
   return (
     <div className="progress">
       <div style={{ width: `${Math.min(100, Math.max(0, value))}%`, background: barColor }} />
@@ -520,7 +520,7 @@ function ClientsDiagnosticSection({
                 </div>
                 <div style={{ flex: 1 }}>
                   <ProgressBar value={selectedClient.overallScore} />
-                  <p style={{ margin: "6px 0 0", fontSize: 12, color: "#475569" }}>
+                  <p style={{ margin: "6px 0 0", fontSize: 12, color: "#374151" }}>
                     {selectedClient.overallScore >= 80
                       ? "Excelente evolução. Paciente mantém adesão e plano preventivo em dia."
                       : selectedClient.overallScore >= 60
@@ -566,12 +566,12 @@ function ClientsDiagnosticSection({
                 </div>
               </div>
 
-              <div style={{ background: "#f8fafc", border: "1px solid #e2e8f0", borderRadius: 12, padding: 14 }}>
+              <div style={{ background: "#f9fbf9", border: "1px solid #d1e7dd", borderRadius: 12, padding: 14 }}>
                 <span className="versionLabel">PLANO DE AÇÃO IMEDIATO</span>
-                <strong style={{ display: "block", color: "#0f172a", fontSize: 13, marginTop: 4 }}>
+                <strong style={{ display: "block", color: "#064e3b", fontSize: 13, marginTop: 4 }}>
                   {selectedClient.nextStep}
                 </strong>
-                <small style={{ color: "#64748b", display: "block", marginTop: 4 }}>
+                <small style={{ color: "#6b7280", display: "block", marginTop: 4 }}>
                   Última visita registrada: {selectedClient.lastVisit}
                 </small>
               </div>
@@ -602,7 +602,7 @@ function ClientsDiagnosticSection({
             <form onSubmit={handleAddClient}>
               <div className="versionModalBody" style={{ gap: 14 }}>
                 <div>
-                  <label style={{ fontSize: 11, fontWeight: 700, color: "#334155", display: "block", marginBottom: 5 }}>
+                  <label style={{ fontSize: 11, fontWeight: 700, color: "#134e4a", display: "block", marginBottom: 5 }}>
                     Nome Completo do Paciente *
                   </label>
                   <input
@@ -611,13 +611,13 @@ function ClientsDiagnosticSection({
                     value={newClientName}
                     onChange={(e) => setNewClientName(e.target.value)}
                     placeholder="Ex: Mariana Albuquerque"
-                    style={{ width: "100%", padding: "9px 12px", borderRadius: 8, border: "1px solid #cbd5e1", fontSize: 13 }}
+                    style={{ width: "100%", padding: "9px 12px", borderRadius: 8, border: "1px solid #cbe4da", fontSize: 13 }}
                   />
                 </div>
 
                 <div className="grid two" style={{ gap: 12 }}>
                   <div>
-                    <label style={{ fontSize: 11, fontWeight: 700, color: "#334155", display: "block", marginBottom: 5 }}>
+                    <label style={{ fontSize: 11, fontWeight: 700, color: "#134e4a", display: "block", marginBottom: 5 }}>
                       Idade
                     </label>
                     <input
@@ -626,17 +626,17 @@ function ClientsDiagnosticSection({
                       onChange={(e) => setNewClientAge(Number(e.target.value))}
                       min={1}
                       max={120}
-                      style={{ width: "100%", padding: "9px 12px", borderRadius: 8, border: "1px solid #cbd5e1", fontSize: 13 }}
+                      style={{ width: "100%", padding: "9px 12px", borderRadius: 8, border: "1px solid #cbe4da", fontSize: 13 }}
                     />
                   </div>
                   <div>
-                    <label style={{ fontSize: 11, fontWeight: 700, color: "#334155", display: "block", marginBottom: 5 }}>
+                    <label style={{ fontSize: 11, fontWeight: 700, color: "#134e4a", display: "block", marginBottom: 5 }}>
                       Status / Categoria
                     </label>
                     <select
                       value={newClientCategory}
                       onChange={(e) => setNewClientCategory(e.target.value as any)}
-                      style={{ width: "100%", padding: "9px 12px", borderRadius: 8, border: "1px solid #cbd5e1", fontSize: 13, background: "#fff" }}
+                      style={{ width: "100%", padding: "9px 12px", borderRadius: 8, border: "1px solid #cbe4da", fontSize: 13, background: "#fff" }}
                     >
                       <option value="Em Tratamento">Em Tratamento</option>
                       <option value="Prioritário">Prioritário</option>
@@ -647,7 +647,7 @@ function ClientsDiagnosticSection({
                 </div>
 
                 <div>
-                  <label style={{ fontSize: 11, fontWeight: 700, color: "#334155", display: "block", marginBottom: 5 }}>
+                  <label style={{ fontSize: 11, fontWeight: 700, color: "#134e4a", display: "block", marginBottom: 5 }}>
                     Pontuação do Diagnóstico (0 - 100): <strong>{newClientScore}</strong>
                   </label>
                   <input
@@ -656,12 +656,12 @@ function ClientsDiagnosticSection({
                     max="100"
                     value={newClientScore}
                     onChange={(e) => setNewClientScore(Number(e.target.value))}
-                    style={{ width: "100%" }}
+                    style={{ width: "100%", accentColor: "#059669" }}
                   />
                 </div>
 
                 <div>
-                  <label style={{ fontSize: 11, fontWeight: 700, color: "#334155", display: "block", marginBottom: 5 }}>
+                  <label style={{ fontSize: 11, fontWeight: 700, color: "#134e4a", display: "block", marginBottom: 5 }}>
                     Diagnóstico Principal / Queixa
                   </label>
                   <input
@@ -669,12 +669,12 @@ function ClientsDiagnosticSection({
                     value={newClientIssue}
                     onChange={(e) => setNewClientIssue(e.target.value)}
                     placeholder="Ex: Sensibilidade dentinária e restauração infiltrada"
-                    style={{ width: "100%", padding: "9px 12px", borderRadius: 8, border: "1px solid #cbd5e1", fontSize: 13 }}
+                    style={{ width: "100%", padding: "9px 12px", borderRadius: 8, border: "1px solid #cbe4da", fontSize: 13 }}
                   />
                 </div>
 
                 <div>
-                  <label style={{ fontSize: 11, fontWeight: 700, color: "#334155", display: "block", marginBottom: 5 }}>
+                  <label style={{ fontSize: 11, fontWeight: 700, color: "#134e4a", display: "block", marginBottom: 5 }}>
                     Próximo Passo / Conduta
                   </label>
                   <input
@@ -682,7 +682,7 @@ function ClientsDiagnosticSection({
                     value={newClientNextStep}
                     onChange={(e) => setNewClientNextStep(e.target.value)}
                     placeholder="Ex: Agendar troca de restauração e profilaxia"
-                    style={{ width: "100%", padding: "9px 12px", borderRadius: 8, border: "1px solid #cbd5e1", fontSize: 13 }}
+                    style={{ width: "100%", padding: "9px 12px", borderRadius: 8, border: "1px solid #cbe4da", fontSize: 13 }}
                   />
                 </div>
               </div>
@@ -916,7 +916,7 @@ export default function App() {
             <span className="dotActive">●</span>
             <div style={{ display: "flex", flexDirection: "column", textAlign: "left", lineHeight: 1.1 }}>
               <span style={{ fontWeight: 800 }}>v{versionData.version}</span>
-              <span style={{ fontSize: 9, color: "#93c5fd" }}>Ver detalhes →</span>
+              <span style={{ fontSize: 9, color: "#6ee7b7" }}>Ver detalhes →</span>
             </div>
           </button>
         </div>
