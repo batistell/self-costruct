@@ -1,14 +1,19 @@
 {
-  "version": "1.1.0",
-  "commitMessage": "v1.1.0: Implementar versionamento nos commits e visualização detalhada da versão",
-  "sha": "9ef8a1c4b723",
-  "date": "2025-05-10T12:00:00Z",
+  "version": "1.2.0",
+  "commitMessage": "v1.2.0: Adicionar numeração de versão nos commits e visualização interativa do commit atual",
+  "sha": "latest",
+  "date": "2025-05-10T12:30:00Z",
   "author": "Self Construct Agent",
   "environment": "Produção / Ao vivo",
   "changelog": [
     {
+      "version": "v1.2.0",
+      "message": "Adicionar numeração de versão nos commits e visualização interativa do commit atual",
+      "date": "Hoje"
+    },
+    {
       "version": "v1.1.0",
-      "message": "Implementar versionamento nos commits e modal de detalhes da versão",
+      "message": "Implementar modal de detalhes da versão e histórico de changelog",
       "date": "Hoje"
     },
     {
