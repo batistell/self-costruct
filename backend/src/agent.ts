@@ -5,6 +5,18 @@ const client = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 const model = process.env.GEMINI_MODEL ?? "gemini-3.7-flash";
 const supervisorUrl = process.env.SUPERVISOR_URL ?? "http://127.0.0.1:3002";
 
+export interface AttachedFile {
+  name: string;
+  type: string;
+  size?: number;
+  data: string;
+}
+
+export interface AgentInput {
+  message: string;
+  files?: AttachedFile[];
+}
+
 export interface ActivityItem {
   id: string;
   tool: string;
@@ -136,8 +148,72 @@ Each GitHub write returns a commit SHA. After completing all requested source ch
 Do not write secrets, API keys, tokens, .env contents, or credentials to GitHub. Keep secrets local.
 When a deploy fails, explain the error and inspect/revise the GitHub source if appropriate. Prefer small coherent changes and concise commit messages.`;
 
-export async function runAgent(message: string, onEvent?: (event: AgentEvent) => void) {
-  const contents: any[] = [{ role: "user", parts: [{ text: message }] }];
+export async function runAgent(
+  input: string | AgentInput,
+  onEvent?: (event: AgentEvent) => void
+) {
+  const message = typeof input === "string" ? input : (input?.message || "");
+  const files = typeof input === "string" ? [] : (input?.files ?? []);
+
+  const userParts: any[] = [];
+  if (message.trim()) {
+    userParts.push({ text: message.trim() });
+  }
+
+  for (const file of files) {
+    let base64Data = file.data || "";
+    let mimeType = file.type || "application/octet-stream";
+
+    if (base64Data.includes(";base64,")) {
+      const parts = base64Data.split(";base64,");
+      if (parts[0].startsWith("data:")) {
+        mimeType = parts[0].slice(5) || mimeType;
+      }
+      base64Data = parts[1] || "";
+    }
+
+    const isText =
+      mimeType.startsWith("text/") ||
+      mimeType === "application/json" ||
+      mimeType === "application/javascript" ||
+      mimeType === "application/typescript" ||
+      mimeType === "application/xml" ||
+      /\.(ts|tsx|js|jsx|json|css|scss|html|md|txt|env|yml|yaml|sql|py|sh|rs|go|c|cpp|h|java|kt|rb|php)$/i.test(
+        file.name
+      );
+
+    if (isText && base64Data) {
+      try {
+        const decoded = Buffer.from(base64Data, "base64").toString("utf-8");
+        userParts.push({
+          text: `[Conteúdo do arquivo anexado "${file.name}" (${mimeType})]:\n\`\`\`\n${decoded}\n\`\`\``,
+        });
+      } catch {
+        userParts.push({
+          inlineData: {
+            mimeType: mimeType || "text/plain",
+            data: base64Data,
+          },
+        });
+      }
+    } else if (base64Data) {
+      userParts.push({
+        inlineData: {
+          mimeType: mimeType || "image/png",
+          data: base64Data,
+        },
+      });
+      userParts.push({
+        text: `[Arquivo anexado: ${file.name} (${mimeType})]`,
+      });
+    }
+  }
+
+  if (userParts.length === 0) {
+    userParts.push({ text: "Olá" });
+  }
+
+  const contents: any[] = [{ role: "user", parts: userParts }];
   const activities: ActivityItem[] = [];
 
   onEvent?.({ type: "status", message: "Iniciando análise com a IA..." });
