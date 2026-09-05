@@ -585,7 +585,7 @@ function ClientsDiagnosticSection() {
                   />
                 </div>
 
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+                <div className="grid two" style={{ gap: 12 }}>
                   <div>
                     <label style={{ fontSize: 11, fontWeight: 700, color: "#334155", display: "block", marginBottom: 5 }}>
                       Idade
@@ -673,9 +673,10 @@ function ClientsDiagnosticSection() {
   );
 }
 
-function App() {
+export default function App() {
   const [section, setSection] = useState<Section>("dashboard");
   const [showVersionModal, setShowVersionModal] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [tasks, setTasks] = useState<Task[]>(() => {
     try { return JSON.parse(localStorage.getItem("dp_tasks") || "null") || defaultTasks; } catch { return defaultTasks; }
   });
@@ -699,25 +700,58 @@ function App() {
     ["profile", "○", "Meu perfil"],
   ];
 
+  const handleNavClick = (id: Section) => {
+    setSection(id);
+    setMobileMenuOpen(false);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
   return (
     <div className="shell">
-      <aside className="sidebar">
-        <button className="brand" onClick={() => setSection("dashboard")}>
-          <span className="brandMark">DP</span>
-          <span><b>Dentista</b><small>de Propósito</small></span>
-        </button>
+      {/* Mobile Drawer Backdrop Overlay */}
+      {mobileMenuOpen && (
+        <div
+          className="mobileDrawerBackdrop"
+          onClick={() => setMobileMenuOpen(false)}
+          aria-hidden="true"
+        />
+      )}
+
+      {/* Main Sidebar (Desktop + Slide-in Mobile Drawer) */}
+      <aside className={`sidebar ${mobileMenuOpen ? "mobileOpen" : ""}`}>
+        <div className="sidebarTopBar">
+          <button className="brand" onClick={() => handleNavClick("dashboard")}>
+            <span className="brandMark">DP</span>
+            <span><b>Dentista</b><small>de Propósito</small></span>
+          </button>
+          <button
+            className="mobileMenuCloseBtn"
+            onClick={() => setMobileMenuOpen(false)}
+            aria-label="Fechar menu"
+          >
+            ✕
+          </button>
+        </div>
 
         <nav>
           <p>SUA JORNADA & CLÍNICA</p>
           {nav.slice(0, 7).map(([id, icon, label]) => (
-            <button key={id} className={section === id ? "active" : ""} onClick={() => setSection(id)}>
+            <button
+              key={id}
+              className={section === id ? "active" : ""}
+              onClick={() => handleNavClick(id)}
+            >
               <i>{icon}</i>{label}
               {id === "clientsDiagnostic" && <span className="navNewBadge">Novo</span>}
             </button>
           ))}
           <p>VOCÊ</p>
           {nav.slice(7).map(([id, icon, label]) => (
-            <button key={id} className={section === id ? "active" : ""} onClick={() => setSection(id)}>
+            <button
+              key={id}
+              className={section === id ? "active" : ""}
+              onClick={() => handleNavClick(id)}
+            >
               <i>{icon}</i>{label}
             </button>
           ))}
@@ -742,7 +776,10 @@ function App() {
         <div className="sidebarFooterVersion">
           <button
             className="versionTriggerBtn"
-            onClick={() => setShowVersionModal(true)}
+            onClick={() => {
+              setShowVersionModal(true);
+              setMobileMenuOpen(false);
+            }}
             title="Clique para ver os detalhes da versão e mensagem do commit"
           >
             <span className="dotActive">●</span>
@@ -755,40 +792,93 @@ function App() {
       </aside>
 
       <main className="main">
-        <header>
-          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-            <span className="headerTitle">Dentista de Propósito</span>
-            {section === "clientsDiagnostic" && (
-              <span style={{ background: "#dbeafe", color: "#1d4ed8", fontSize: 11, fontWeight: 700, padding: "3px 8px", borderRadius: 6 }}>
-                Aba Diagnóstico de Clientes
-              </span>
-            )}
+        <header className="mainHeader">
+          <div className="headerLeft">
+            <button
+              className="mobileMenuToggleBtn"
+              onClick={() => setMobileMenuOpen(true)}
+              aria-label="Abrir menu de navegação"
+            >
+              <span className="hamburgerIcon">☰</span>
+              <span className="menuLabel">Menu</span>
+            </button>
+            <div className="headerTitleWrapper">
+              <span className="headerTitle">Dentista de Propósito</span>
+              {section === "clientsDiagnostic" && (
+                <span className="headerSectionPill">
+                  👥 Clientes
+                </span>
+              )}
+            </div>
           </div>
 
           <div className="headerActionsRow">
-            <button onClick={() => setSection("clientsDiagnostic")}>👥 Clientes</button>
-            <button>? Ajuda</button>
+            <button className="headerActionButton primaryAccent" onClick={() => handleNavClick("clientsDiagnostic")}>
+              👥 Clientes
+            </button>
+            <button className="headerActionButton" onClick={() => handleNavClick("profile")}>
+              👤 Matheus
+            </button>
           </div>
         </header>
 
         <div className="content">
           {section === "dashboard" && (
             <Dashboard
-              setSection={setSection}
+              setSection={handleNavClick}
               tasks={tasks}
               toggle={toggle}
               completed={completed}
             />
           )}
-          {section === "journey" && <Journey setSection={setSection} />}
+          {section === "journey" && <Journey setSection={handleNavClick} />}
           {section === "diagnostic" && <Diagnostic />}
           {section === "clientsDiagnostic" && <ClientsDiagnosticSection />}
-          {section === "goals" && <Goals setSection={setSection} />}
+          {section === "goals" && <Goals setSection={handleNavClick} />}
           {section === "plan" && <Plan tasks={tasks} toggle={toggle} />}
           {section === "content" && <Content />}
           {section === "progress" && <Progress completed={completed} />}
           {section === "profile" && <Profile />}
         </div>
+
+        {/* Mobile Bottom Navigation Bar for easy one-handed access on phones */}
+        <nav className="mobileBottomNav" aria-label="Navegação móvel inferior">
+          <button
+            className={`bottomNavItem ${section === "dashboard" ? "active" : ""}`}
+            onClick={() => handleNavClick("dashboard")}
+          >
+            <span className="bottomNavIcon">⌂</span>
+            <span className="bottomNavLabel">Início</span>
+          </button>
+          <button
+            className={`bottomNavItem ${section === "clientsDiagnostic" ? "active" : ""}`}
+            onClick={() => handleNavClick("clientsDiagnostic")}
+          >
+            <span className="bottomNavIcon">👥</span>
+            <span className="bottomNavLabel">Clientes</span>
+          </button>
+          <button
+            className={`bottomNavItem ${section === "plan" ? "active" : ""}`}
+            onClick={() => handleNavClick("plan")}
+          >
+            <span className="bottomNavIcon">✓</span>
+            <span className="bottomNavLabel">Plano</span>
+          </button>
+          <button
+            className={`bottomNavItem ${section === "diagnostic" ? "active" : ""}`}
+            onClick={() => handleNavClick("diagnostic")}
+          >
+            <span className="bottomNavIcon">◎</span>
+            <span className="bottomNavLabel">Diagnóstico</span>
+          </button>
+          <button
+            className="bottomNavItem"
+            onClick={() => setMobileMenuOpen(true)}
+          >
+            <span className="bottomNavIcon">☰</span>
+            <span className="bottomNavLabel">Mais</span>
+          </button>
+        </nav>
       </main>
 
       <VersionModal isOpen={showVersionModal} onClose={() => setShowVersionModal(false)} />
