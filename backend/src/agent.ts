@@ -62,25 +62,25 @@ const functionDeclarations: any[] = [
   },
   {
     name: "github_write_file",
-    description: "Create or replace a source file directly on GitHub. This creates a commit and returns its SHA.",
+    description: "Create or replace a source file directly on GitHub. This creates a commit and returns its SHA. Commit messages MUST include a semantic version prefix (e.g. 'v1.1.0: concise description').",
     parameters: {
       type: "object",
       properties: {
         path: { type: "string" },
         content: { type: "string" },
-        message: { type: "string", description: "Concise Git commit message." },
+        message: { type: "string", description: "Concise Git commit message prefixed with version number (e.g. 'v1.1.0: ...')." },
       },
       required: ["path", "content", "message"],
     },
   },
   {
     name: "github_delete_file",
-    description: "Delete a file directly on GitHub. This creates a commit and returns its SHA.",
+    description: "Delete a file directly on GitHub. This creates a commit and returns its SHA. Commit messages MUST include a semantic version prefix (e.g. 'v1.1.0: concise description').",
     parameters: {
       type: "object",
       properties: {
         path: { type: "string" },
-        message: { type: "string" },
+        message: { type: "string", description: "Git commit message prefixed with version number (e.g. 'v1.1.0: ...')." },
       },
       required: ["path", "message"],
     },
@@ -150,6 +150,7 @@ async function executeTool(name: string, args: any) {
 
 const instructions = `You are the Self Construct engineering agent. The GitHub repository is the canonical source of truth.
 Inspect repository files before making non-trivial changes. Make changes using github_write_file/github_delete_file, never by assuming a local filesystem edit.
+Every Git commit message MUST begin with a version number prefix (e.g. 'v1.1.0: concise description' or 'v1.2.0: ...').
 Each GitHub write returns a commit SHA. After completing all requested source changes, deploy the newest returned SHA with deploy_commit so the running tablet instance updates itself.
 Do not write secrets, API keys, tokens, .env contents, or credentials to GitHub. Keep secrets local.
 When a deploy fails, explain the error and inspect/revise the GitHub source if appropriate. Prefer small coherent changes and concise commit messages.`;
