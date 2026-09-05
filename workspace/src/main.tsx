@@ -738,7 +738,7 @@ function App() {
           </div>
         </div>
 
-        {/* Prominent Sidebar Version Button */}
+        {/* Sidebar Version Button */}
         <div className="sidebarFooterVersion">
           <button
             className="versionTriggerBtn"
@@ -748,27 +748,13 @@ function App() {
             <span className="dotActive">●</span>
             <div style={{ display: "flex", flexDirection: "column", textAlign: "left", lineHeight: 1.1 }}>
               <span style={{ fontWeight: 800 }}>v{versionData.version}</span>
-              <span style={{ fontSize: 9, color: "#93c5fd" }}>Ver mensagem →</span>
+              <span style={{ fontSize: 9, color: "#93c5fd" }}>Ver detalhes →</span>
             </div>
           </button>
         </div>
       </aside>
 
       <main className="main">
-        {/* Top Full Version Banner */}
-        <div className="topVersionBanner" onClick={() => setShowVersionModal(true)} role="button" tabIndex={0} title="Clique para ver os detalhes completos da versão">
-          <div className="topVersionBadge">
-            <span className="dotPulse" />
-            <b>v{versionData.version}</b>
-          </div>
-          <div className="topVersionMessage">
-            <strong>Commit Atual:</strong> <span>{versionData.commitMessage}</span>
-          </div>
-          <button className="topVersionButton" onClick={(e) => { e.stopPropagation(); setShowVersionModal(true); }}>
-            Ver mais ↗
-          </button>
-        </div>
-
         <header>
           <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
             <span className="headerTitle">Dentista de Propósito</span>
@@ -780,15 +766,6 @@ function App() {
           </div>
 
           <div className="headerActionsRow">
-            <button
-              className="headerVersionBadge"
-              onClick={() => setShowVersionModal(true)}
-              title="Ver mensagem do commit e versão"
-            >
-              <span className="dotActive">●</span>
-              <b>v{versionData.version}</b>
-              <span className="headerVersionAction">Ver mais</span>
-            </button>
             <button onClick={() => setSection("clientsDiagnostic")}>👥 Clientes</button>
             <button>? Ajuda</button>
           </div>
@@ -801,7 +778,6 @@ function App() {
               tasks={tasks}
               toggle={toggle}
               completed={completed}
-              onOpenVersion={() => setShowVersionModal(true)}
             />
           )}
           {section === "journey" && <Journey setSection={setSection} />}
@@ -815,18 +791,6 @@ function App() {
         </div>
       </main>
 
-      {/* Floating quick-access badge button on bottom right */}
-      <button
-        className="floatingVersionBadge"
-        onClick={() => setShowVersionModal(true)}
-        title="Clique para ver o commit e versão"
-      >
-        <span className="dotPulse" />
-        <span className="floatingVerText">v{versionData.version}</span>
-        <span className="floatingCommitText">{versionData.commitMessage.slice(0, 36)}...</span>
-        <span className="floatingAction">Ver mais</span>
-      </button>
-
       <VersionModal isOpen={showVersionModal} onClose={() => setShowVersionModal(false)} />
     </div>
   );
@@ -837,27 +801,14 @@ function Dashboard({
   tasks,
   toggle,
   completed,
-  onOpenVersion
 }: {
   setSection: (s: Section) => void;
   tasks: Task[];
   toggle: (id: number) => void;
   completed: number;
-  onOpenVersion: () => void;
 }) {
   return (
     <>
-      {/* Active Version Highlight Card on Dashboard */}
-      <div className="versionDashboardNotice" onClick={onOpenVersion} role="button" tabIndex={0}>
-        <div className="noticeLeft">
-          <span className="noticePill">VERSÃO ATIVA: v{versionData.version}</span>
-          <p className="noticeCommit">{versionData.commitMessage}</p>
-        </div>
-        <button className="noticeActionBtn" onClick={(e) => { e.stopPropagation(); onOpenVersion(); }}>
-          Ver detalhes do commit →
-        </button>
-      </div>
-
       <section className="welcome">
         <div>
           <span className="eyebrow gold">SÁBADO, 5 DE SETEMBRO</span>
