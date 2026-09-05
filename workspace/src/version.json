@@ -1,14 +1,14 @@
 {
   "version": "1.3.2",
-  "commitMessage": "v1.3.2: Otimização responsiva completa para celular com menu mobile, barra inferior e navegação fluida",
-  "sha": "b92e71c",
-  "date": "2025-05-10T15:00:00Z",
+  "commitMessage": "v1.3.2: Otimização responsiva completa para celular com gaveta lateral, navegação inferior e suporte a toque",
+  "sha": "0a954ba",
+  "date": "2025-05-10T15:10:00Z",
   "author": "Self Construct Agent",
   "environment": "Produção / Ao vivo",
   "changelog": [
     {
       "version": "v1.3.2",
-      "message": "Otimização responsiva completa para celular com menu mobile, barra inferior e navegação fluida",
+      "message": "Otimização responsiva completa para celular com gaveta lateral, navegação inferior e suporte a toque",
       "date": "Hoje"
     },
     {
