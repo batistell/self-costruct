@@ -267,6 +267,11 @@ export default function App() {
   const [isDragOver, setIsDragOver] = useState(false);
   const [h2Info, setH2Info] = useState<H2DbInfo | null>(null);
 
+  // Message inline editing states
+  const [editingMessageId, setEditingMessageId] = useState<string | null>(null);
+  const [editingText, setEditingText] = useState("");
+  const [savingEdit, setSavingEdit] = useState(false);
+
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -378,6 +383,56 @@ export default function App() {
         setH2Info(data);
       }
     } catch {}
+  }
+
+  function startEditingMessage(msg: Message) {
+    setEditingMessageId(msg.id);
+    setEditingText(msg.text);
+  }
+
+  function cancelEditingMessage() {
+    setEditingMessageId(null);
+    setEditingText("");
+  }
+
+  async function saveEditedMessage(id: string) {
+    if (savingEdit) return;
+    setSavingEdit(true);
+    try {
+      const res = await fetch(`/api/messages/${encodeURIComponent(id)}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text: editingText }),
+      });
+      if (res.ok) {
+        setMessages((prev) =>
+          prev.map((m) => (m.id === id ? { ...m, text: editingText } : m))
+        );
+        setEditingMessageId(null);
+        setEditingText("");
+        await refreshH2Info();
+      } else {
+        alert("Não foi possível salvar a alteração da mensagem.");
+      }
+    } catch (err) {
+      console.error("Erro ao salvar mensagem editada:", err);
+      alert("Erro ao salvar a alteração.");
+    } finally {
+      setSavingEdit(false);
+    }
+  }
+
+  async function handleDeleteMessage(id: string) {
+    if (!confirm("Tem certeza que deseja excluir esta mensagem do histórico?")) return;
+    try {
+      await fetch(`/api/messages/${encodeURIComponent(id)}`, {
+        method: "DELETE",
+      });
+      setMessages((prev) => prev.filter((m) => m.id !== id));
+      await refreshH2Info();
+    } catch (err) {
+      console.error("Erro ao excluir mensagem:", err);
+    }
   }
 
   async function submit(event: FormEvent) {
@@ -568,6 +623,7 @@ export default function App() {
 
   async function handleClearChat() {
     if (busy) return;
+    if (!confirm("Deseja realmente limpar todo o histórico de mensagens?")) return;
     try {
       await fetch("/api/messages", { method: "DELETE" });
       await refreshH2Info();
@@ -598,7 +654,7 @@ export default function App() {
               <span>Log & Execução em Tempo Real no GitHub</span>
               {h2Info && (
                 <span className="h2Badge" title={`Arquivo H2: ${h2Info.filePath || "data/h2_messages.db"}`}>
-                  💾 H2: {h2Info.totalMessages ?? messages.length} msg(s) salva(s)
+                  💾 H2: {h2Info.totalMessages ?? messages.length} msg(s)
                 </span>
               )}
             </div>
@@ -627,39 +683,95 @@ export default function App() {
         </header>
 
         <div className="messages">
-          {messages.map((message) => (
-            <article key={message.id} className={`${message.role} ${message.isLive ? "live-article" : ""}`}>
-              <div className="messageHeader">
-                <b>{message.role === "user" ? "👤 Você" : "🤖 Agente"}</b>
-                {message.isLive && (
-                  <span className="liveBadge">
-                    <span className="pulseDot" /> AO VIVO
-                  </span>
-                )}
-              </div>
+          {messages.map((message) => {
+            const isEditing = editingMessageId === message.id;
 
-              {message.attachments && message.attachments.length > 0 && (
-                <MessageAttachmentsView attachments={message.attachments} />
-              )}
-
-              {message.isLive && message.status && (
-                <div className="liveStatusBanner">
-                  <span className="spinnerIcon small" />
-                  <span>{message.status}</span>
+            return (
+              <article key={message.id} className={`${message.role} ${message.isLive ? "live-article" : ""}`}>
+                <div className="messageHeader">
+                  <b>{message.role === "user" ? "👤 Você" : "🤖 Agente"}</b>
+                  <div className="messageHeaderActions">
+                    {message.isLive && (
+                      <span className="liveBadge">
+                        <span className="pulseDot" /> AO VIVO
+                      </span>
+                    )}
+                    {!message.isLive && (
+                      <>
+                        <button
+                          type="button"
+                          className="msgActionBtn"
+                          onClick={() => (isEditing ? cancelEditingMessage() : startEditingMessage(message))}
+                          title={isEditing ? "Cancelar edição" : "Alterar / Editar mensagem"}
+                          aria-label="Editar mensagem"
+                        >
+                          ✏️
+                        </button>
+                        <button
+                          type="button"
+                          className="msgActionBtn delete"
+                          onClick={() => handleDeleteMessage(message.id)}
+                          title="Excluir esta mensagem"
+                          aria-label="Excluir mensagem"
+                        >
+                          🗑️
+                        </button>
+                      </>
+                    )}
+                  </div>
                 </div>
-              )}
 
-              {message.activities && message.activities.length > 0 && (
-                <ActivityList activities={message.activities} isLive={message.isLive} />
-              )}
+                {message.attachments && message.attachments.length > 0 && (
+                  <MessageAttachmentsView attachments={message.attachments} />
+                )}
 
-              {message.text ? (
-                <p className="messageText">{message.text}</p>
-              ) : message.isLive ? null : (
-                <p className="messageText muted">Nenhuma mensagem textual retornada.</p>
-              )}
-            </article>
-          ))}
+                {message.isLive && message.status && (
+                  <div className="liveStatusBanner">
+                    <span className="spinnerIcon small" />
+                    <span>{message.status}</span>
+                  </div>
+                )}
+
+                {message.activities && message.activities.length > 0 && (
+                  <ActivityList activities={message.activities} isLive={message.isLive} />
+                )}
+
+                {isEditing ? (
+                  <div className="msgEditContainer">
+                    <textarea
+                      className="msgEditTextarea"
+                      value={editingText}
+                      onChange={(e) => setEditingText(e.target.value)}
+                      rows={3}
+                      autoFocus
+                    />
+                    <div className="msgEditButtons">
+                      <button
+                        type="button"
+                        className="msgSaveBtn"
+                        onClick={() => saveEditedMessage(message.id)}
+                        disabled={savingEdit}
+                      >
+                        {savingEdit ? "Salvando..." : "Salvar"}
+                      </button>
+                      <button
+                        type="button"
+                        className="msgCancelBtn"
+                        onClick={cancelEditingMessage}
+                        disabled={savingEdit}
+                      >
+                        Cancelar
+                      </button>
+                    </div>
+                  </div>
+                ) : message.text ? (
+                  <p className="messageText">{message.text}</p>
+                ) : message.isLive ? null : (
+                  <p className="messageText muted">Nenhuma mensagem textual retornada.</p>
+                )}
+              </article>
+            );
+          })}
           <div ref={messagesEndRef} />
         </div>
 
