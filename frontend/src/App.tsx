@@ -1,4 +1,4 @@
-import { FormEvent, useEffect, useRef, useState } from "react";
+import { ClipboardEvent, DragEvent, FormEvent, useEffect, useRef, useState } from "react";
 
 export type ActivityItem = {
   id: string;
@@ -11,10 +11,19 @@ export type ActivityItem = {
   endTime?: number;
 };
 
+export type AttachedFile = {
+  id: string;
+  name: string;
+  type: string;
+  size: number;
+  data: string; // Base64 Data URL
+};
+
 export type Message = {
   id: string;
   role: "user" | "assistant";
   text: string;
+  attachments?: AttachedFile[];
   status?: string;
   activities?: ActivityItem[];
   isLive?: boolean;
@@ -42,6 +51,23 @@ function formatDuration(start: number, end?: number) {
   const ms = end - start;
   if (ms < 1000) return `${ms}ms`;
   return `${(ms / 1000).toFixed(1)}s`;
+}
+
+function formatFileSize(bytes: number) {
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+}
+
+function getFileIcon(mimeType: string, filename: string) {
+  if (mimeType.startsWith("image/")) return "🖼️";
+  if (mimeType.startsWith("video/")) return "🎬";
+  if (mimeType.startsWith("audio/")) return "🎵";
+  if (mimeType.includes("pdf")) return "📕";
+  if (mimeType.includes("json") || /\.(json|ya?ml)$/i.test(filename)) return "⚙️";
+  if (/\.(ts|tsx|js|jsx|html|css|scss|py|rs|go|c|cpp|java|php|sql|sh)$/i.test(filename)) return "💻";
+  if (mimeType.startsWith("text/") || /\.(txt|md|log|csv)$/i.test(filename)) return "📄";
+  return "📁";
 }
 
 function ActivityList({ activities, isLive }: { activities: ActivityItem[]; isLive?: boolean }) {
@@ -134,30 +160,188 @@ function ActivityList({ activities, isLive }: { activities: ActivityItem[]; isLi
   );
 }
 
+function AttachmentPreviewList({
+  attachments,
+  onRemove,
+  onClearAll,
+}: {
+  attachments: AttachedFile[];
+  onRemove: (id: string) => void;
+  onClearAll: () => void;
+}) {
+  if (attachments.length === 0) return null;
+
+  return (
+    <div className="attachmentQueueContainer">
+      <div className="attachmentQueueHeader">
+        <span>
+          📎 Arquivos anexados ({attachments.length})
+        </span>
+        {attachments.length > 1 && (
+          <button type="button" className="clearAttachmentsBtn" onClick={onClearAll}>
+            Remover todos
+          </button>
+        )}
+      </div>
+      <div className="attachmentQueueList">
+        {attachments.map((file) => (
+          <div key={file.id} className="attachmentQueueItem" title={file.name}>
+            {file.type.startsWith("image/") ? (
+              <img src={file.data} alt={file.name} className="attachmentQueueThumb" />
+            ) : (
+              <span className="attachmentQueueIcon">{getFileIcon(file.type, file.name)}</span>
+            )}
+            <div className="attachmentQueueMeta">
+              <span className="attachmentQueueName">{file.name}</span>
+              <span className="attachmentQueueSize">{formatFileSize(file.size)}</span>
+            </div>
+            <button
+              type="button"
+              className="attachmentRemoveBtn"
+              onClick={() => onRemove(file.id)}
+              aria-label={`Remover ${file.name}`}
+              title="Remover anexo"
+            >
+              ✕
+            </button>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function MessageAttachmentsView({ attachments }: { attachments: AttachedFile[] }) {
+  if (!attachments || attachments.length === 0) return null;
+
+  return (
+    <div className="messageAttachmentsContainer">
+      {attachments.map((file) => (
+        <div key={file.id} className={`messageAttachmentCard ${file.type.startsWith("image/") ? "is-image" : ""}`}>
+          {file.type.startsWith("image/") ? (
+            <a href={file.data} target="_blank" rel="noopener noreferrer" className="imageAttachmentLink">
+              <img src={file.data} alt={file.name} className="messageAttachmentImage" />
+              <div className="imageOverlay">
+                <span className="imageOverlayName">{file.name}</span>
+                <span className="imageOverlaySize">{formatFileSize(file.size)}</span>
+              </div>
+            </a>
+          ) : (
+            <div className="docAttachmentChip">
+              <span className="docIcon">{getFileIcon(file.type, file.name)}</span>
+              <div className="docInfo">
+                <span className="docName" title={file.name}>
+                  {file.name}
+                </span>
+                <span className="docSize">{formatFileSize(file.size)}</span>
+              </div>
+            </div>
+          )}
+        </div>
+      ))}
+    </div>
+  );
+}
+
 export default function App() {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: "initial",
       role: "assistant",
-      text: "Self Construct online. Diga-me o que alterar; vou inspecionar o repositório, editar o GitHub em tempo real e implantar o commit resultante.",
+      text: "Self Construct online. Diga-me o que alterar ou anexe arquivos e imagens; vou inspecionar o repositório, editar o GitHub em tempo real e implantar o commit resultante.",
     },
   ]);
   const [input, setInput] = useState("");
+  const [attachments, setAttachments] = useState<AttachedFile[]>([]);
   const [busy, setBusy] = useState(false);
   const [previewKey, setPreviewKey] = useState(0);
   const [isChatCollapsed, setIsChatCollapsed] = useState(false);
+  const [isDragOver, setIsDragOver] = useState(false);
+
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages, busy]);
+  }, [messages, busy, attachments]);
+
+  const processFiles = (fileList: FileList | File[]) => {
+    const filesArray = Array.from(fileList);
+    if (filesArray.length === 0) return;
+
+    filesArray.forEach((file) => {
+      // 20MB limit per file check
+      if (file.size > 20 * 1024 * 1024) {
+        alert(`O arquivo "${file.name}" excede o limite recomendado de 20MB.`);
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = () => {
+        const result = reader.result;
+        if (typeof result === "string") {
+          const newAttachment: AttachedFile = {
+            id: `file_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
+            name: file.name,
+            type: file.type || "application/octet-stream",
+            size: file.size,
+            data: result,
+          };
+          setAttachments((prev) => [...prev, newAttachment]);
+        }
+      };
+      reader.readAsDataURL(file);
+    });
+  };
+
+  const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      processFiles(e.target.files);
+      // Reset input value to allow uploading the same file again if desired
+      e.target.value = "";
+    }
+  };
+
+  const handlePaste = (e: ClipboardEvent<HTMLTextAreaElement>) => {
+    if (e.clipboardData && e.clipboardData.files && e.clipboardData.files.length > 0) {
+      processFiles(e.clipboardData.files);
+    }
+  };
+
+  const handleDragOver = (e: DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragOver(true);
+  };
+
+  const handleDragLeave = (e: DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragOver(false);
+  };
+
+  const handleDrop = (e: DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragOver(false);
+    if (e.dataTransfer && e.dataTransfer.files) {
+      processFiles(e.dataTransfer.files);
+    }
+  };
+
+  const removeAttachment = (id: string) => {
+    setAttachments((prev) => prev.filter((a) => a.id !== id));
+  };
 
   async function submit(event: FormEvent) {
     event.preventDefault();
     const messageText = input.trim();
-    if (!messageText || busy) return;
+    const currentAttachments = [...attachments];
+
+    if ((!messageText && currentAttachments.length === 0) || busy) return;
 
     setInput("");
+    setAttachments([]);
     setBusy(true);
 
     const userMessageId = `user_${Date.now()}`;
@@ -165,7 +349,12 @@ export default function App() {
 
     setMessages((current) => [
       ...current,
-      { id: userMessageId, role: "user", text: messageText },
+      {
+        id: userMessageId,
+        role: "user",
+        text: messageText,
+        attachments: currentAttachments.length > 0 ? currentAttachments : undefined,
+      },
       {
         id: assistantMessageId,
         role: "assistant",
@@ -183,7 +372,11 @@ export default function App() {
           "Content-Type": "application/json",
           Accept: "text/event-stream",
         },
-        body: JSON.stringify({ message: messageText, stream: true }),
+        body: JSON.stringify({
+          message: messageText,
+          files: currentAttachments,
+          stream: true,
+        }),
       });
 
       if (!response.ok) {
@@ -329,14 +522,19 @@ export default function App() {
       {
         id: `init_${Date.now()}`,
         role: "assistant",
-        text: "Histórico limpo. Diga-me o que gostaria de alterar no projeto.",
+        text: "Histórico limpo. Diga-me o que gostaria de alterar no projeto ou envie arquivos/imagens.",
       },
     ]);
   }
 
   return (
-    <main className={`shell ${isChatCollapsed ? "collapsed" : ""}`}>
-      <section className="agentPane">
+    <main
+      className={`shell ${isChatCollapsed ? "collapsed" : ""}`}
+      onDragOver={handleDragOver}
+      onDragLeave={handleDragLeave}
+      onDrop={handleDrop}
+    >
+      <section className={`agentPane ${isDragOver ? "drag-active" : ""}`}>
         <header>
           <div>
             <strong>SELF CONSTRUCT</strong>
@@ -377,6 +575,10 @@ export default function App() {
                 )}
               </div>
 
+              {message.attachments && message.attachments.length > 0 && (
+                <MessageAttachmentsView attachments={message.attachments} />
+              )}
+
               {message.isLive && message.status && (
                 <div className="liveStatusBanner">
                   <span className="spinnerIcon small" />
@@ -398,23 +600,73 @@ export default function App() {
           <div ref={messagesEndRef} />
         </div>
 
-        <form onSubmit={submit}>
-          <textarea
-            value={input}
-            onChange={(event) => setInput(event.target.value)}
-            onKeyDown={(event) => {
-              if (event.key === "Enter" && !event.shiftKey) {
-                event.preventDefault();
-                submit(event);
-              }
-            }}
-            placeholder={busy ? "Agente trabalhando no repositório..." : "Descreva o que alterar (Enter para enviar)..."}
-            rows={3}
-            disabled={busy}
+        {isDragOver && (
+          <div className="dragDropOverlay">
+            <div className="dragDropCard">
+              <span className="dragIcon">📥</span>
+              <strong>Solte os arquivos aqui</strong>
+              <span>Eles serão anexados para análise</span>
+            </div>
+          </div>
+        )}
+
+        <form onSubmit={submit} className="chatForm">
+          <input
+            type="file"
+            ref={fileInputRef}
+            onChange={handleFileInputChange}
+            multiple
+            style={{ display: "none" }}
+            aria-hidden="true"
           />
-          <button disabled={busy} type="submit">
-            {busy ? "Executando…" : "Enviar"}
-          </button>
+
+          <AttachmentPreviewList
+            attachments={attachments}
+            onRemove={removeAttachment}
+            onClearAll={() => setAttachments([])}
+          />
+
+          <div className="inputRow">
+            <button
+              type="button"
+              className="attachButton"
+              onClick={() => fileInputRef.current?.click()}
+              disabled={busy}
+              title="Anexar arquivos ou imagens"
+              aria-label="Anexar arquivos"
+            >
+              📎
+            </button>
+
+            <textarea
+              value={input}
+              onChange={(event) => setInput(event.target.value)}
+              onPaste={handlePaste}
+              onKeyDown={(event) => {
+                if (event.key === "Enter" && !event.shiftKey) {
+                  event.preventDefault();
+                  submit(event);
+                }
+              }}
+              placeholder={
+                busy
+                  ? "Agente trabalhando no repositório..."
+                  : attachments.length > 0
+                  ? "Descreva o que fazer com os anexos (Enter para enviar)..."
+                  : "Descreva o que alterar ou cole imagens/arquivos (Enter para enviar)..."
+              }
+              rows={attachments.length > 0 ? 2 : 3}
+              disabled={busy}
+            />
+
+            <button
+              className="sendBtn"
+              disabled={busy || (!input.trim() && attachments.length === 0)}
+              type="submit"
+            >
+              {busy ? "Executando…" : "Enviar"}
+            </button>
+          </div>
         </form>
       </section>
 
