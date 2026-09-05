@@ -27,6 +27,16 @@ export type Message = {
   status?: string;
   activities?: ActivityItem[];
   isLive?: boolean;
+  createdAt?: number;
+};
+
+export type H2DbInfo = {
+  engine?: string;
+  version?: string;
+  filePath?: string;
+  fileSizeBytes?: number;
+  totalMessages?: number;
+  lastSaved?: string;
 };
 
 function getToolBadge(tool: string) {
@@ -174,9 +184,7 @@ function AttachmentPreviewList({
   return (
     <div className="attachmentQueueContainer">
       <div className="attachmentQueueHeader">
-        <span>
-          📎 Arquivos anexados ({attachments.length})
-        </span>
+        <span>📎 Arquivos anexados ({attachments.length})</span>
         {attachments.length > 1 && (
           <button type="button" className="clearAttachmentsBtn" onClick={onClearAll}>
             Remover todos
@@ -257,9 +265,39 @@ export default function App() {
   const [previewKey, setPreviewKey] = useState(0);
   const [isChatCollapsed, setIsChatCollapsed] = useState(false);
   const [isDragOver, setIsDragOver] = useState(false);
+  const [h2Info, setH2Info] = useState<H2DbInfo | null>(null);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Load messages from H2 Database File whenever the site opens or reloads
+  useEffect(() => {
+    let isMounted = true;
+
+    async function loadFromH2() {
+      try {
+        const response = await fetch("/api/messages");
+        if (!response.ok) return;
+        const data = await response.json();
+        if (isMounted) {
+          if (Array.isArray(data.messages) && data.messages.length > 0) {
+            setMessages(data.messages);
+          }
+          if (data.info) {
+            setH2Info(data.info);
+          }
+        }
+      } catch (err) {
+        console.warn("[H2 Database] Não foi possível carregar mensagens salvas do arquivo:", err);
+      }
+    }
+
+    loadFromH2();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -297,7 +335,6 @@ export default function App() {
   const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
       processFiles(e.target.files);
-      // Reset input value to allow uploading the same file again if desired
       e.target.value = "";
     }
   };
@@ -332,6 +369,16 @@ export default function App() {
   const removeAttachment = (id: string) => {
     setAttachments((prev) => prev.filter((a) => a.id !== id));
   };
+
+  async function refreshH2Info() {
+    try {
+      const res = await fetch("/api/h2/info");
+      if (res.ok) {
+        const data = await res.json();
+        setH2Info(data);
+      }
+    } catch {}
+  }
 
   async function submit(event: FormEvent) {
     event.preventDefault();
@@ -376,6 +423,8 @@ export default function App() {
           message: messageText,
           files: currentAttachments,
           stream: true,
+          userMessageId,
+          assistantMessageId,
         }),
       });
 
@@ -513,11 +562,18 @@ export default function App() {
       );
     } finally {
       setBusy(false);
+      refreshH2Info();
     }
   }
 
-  function handleClearChat() {
+  async function handleClearChat() {
     if (busy) return;
+    try {
+      await fetch("/api/messages", { method: "DELETE" });
+      await refreshH2Info();
+    } catch (err) {
+      console.error("[H2 Database] Erro ao limpar histórico:", err);
+    }
     setMessages([
       {
         id: `init_${Date.now()}`,
@@ -538,7 +594,14 @@ export default function App() {
         <header>
           <div>
             <strong>SELF CONSTRUCT</strong>
-            <span>Log & Execução em Tempo Real no GitHub</span>
+            <div className="headerSubRow">
+              <span>Log & Execução em Tempo Real no GitHub</span>
+              {h2Info && (
+                <span className="h2Badge" title={`Arquivo H2: ${h2Info.filePath || "data/h2_messages.db"}`}>
+                  💾 H2: {h2Info.totalMessages ?? messages.length} msg(s) salva(s)
+                </span>
+              )}
+            </div>
           </div>
           <div className="headerActions">
             <span className="status">● online</span>
@@ -546,7 +609,7 @@ export default function App() {
               type="button"
               className="toggleBtn iconOnly"
               onClick={handleClearChat}
-              title="Limpar mensagens do chat"
+              title="Limpar mensagens do chat e banco H2"
               disabled={busy}
             >
               🗑️ Limpar
