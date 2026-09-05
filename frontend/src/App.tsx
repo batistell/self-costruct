@@ -40,13 +40,14 @@ export type H2DbInfo = {
 };
 
 const CURRENT_PLATFORM_VERSION = {
-  version: "1.3.2",
-  commitMessage: "v1.3.2: Otimização responsiva completa para celulares e tablets com menu mobile e barra de navegação",
-  sha: "2c94c8a",
+  version: "1.3.3",
+  commitMessage: "v1.3.3: Corrigir URL dinâmica do preview para acesso no celular e tablets via IP de rede",
+  sha: "a93b4ef",
   author: "Self Construct Agent",
   environment: "Produção / Ao vivo",
   changelog: [
-    { version: "v1.3.2", message: "Otimização responsiva completa para celulares e tablets com menu mobile e barra de navegação", date: "Hoje" },
+    { version: "v1.3.3", message: "Corrigir URL dinâmica do preview para acesso no celular e tablets via IP de rede", date: "Hoje" },
+    { version: "v1.3.2", message: "Otimização responsiva completa para celular com gaveta lateral e navegação inferior", date: "Hoje" },
     { version: "v1.3.1", message: "Manter exibição da versão exclusivamente na barra lateral", date: "Hoje" },
     { version: "v1.3.0", message: "Adicionar aba completa de Diagnóstico dos Clientes e destaque visual da versão", date: "Hoje" },
     { version: "v1.2.2", message: "Adicionar banner e badge fixo com versão e mensagem do commit em destaque", date: "Hoje" },
@@ -283,6 +284,22 @@ export default function App() {
   const [mobileView, setMobileView] = useState<"site" | "chat">("site");
   const [isDragOver, setIsDragOver] = useState(false);
   const [h2Info, setH2Info] = useState<H2DbInfo | null>(null);
+
+  // Dynamic preview URL using current host IP/domain so it works seamlessly on mobile
+  const [previewUrl, setPreviewUrl] = useState<string>(() => {
+    if (typeof window !== "undefined") {
+      const hostname = window.location.hostname || "127.0.0.1";
+      return `http://${hostname}:5174`;
+    }
+    return "http://127.0.0.1:5174";
+  });
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const hostname = window.location.hostname || "127.0.0.1";
+      setPreviewUrl(`http://${hostname}:5174`);
+    }
+  }, []);
 
   // Message inline editing states
   const [editingMessageId, setEditingMessageId] = useState<string | null>(null);
@@ -923,9 +940,21 @@ export default function App() {
               )}
               <strong>Pré-visualização ao vivo</strong>
             </div>
-            <button onClick={() => setPreviewKey((value) => value + 1)}>Recarregar</button>
+            <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
+              <a
+                href={previewUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="toggleBtn"
+                style={{ textDecoration: "none" }}
+                title="Abrir site diretamente em tela cheia / nova aba"
+              >
+                ↗ Nova Aba
+              </a>
+              <button onClick={() => setPreviewKey((value) => value + 1)}>Recarregar</button>
+            </div>
           </header>
-          <iframe key={previewKey} src="http://127.0.0.1:5174" title="Pré-visualização do Self Construct" />
+          <iframe key={previewKey} src={previewUrl} title="Pré-visualização do Self Construct" />
         </section>
       </main>
     </>
