@@ -40,12 +40,13 @@ export type H2DbInfo = {
 };
 
 const CURRENT_PLATFORM_VERSION = {
-  version: "1.2.2",
-  commitMessage: "v1.2.2: Adicionar banner e badge fixo com versão e mensagem do commit em destaque",
-  sha: "14f8a92",
+  version: "1.3.0",
+  commitMessage: "v1.3.0: Adicionar aba completa de Diagnóstico dos Clientes e destaque visual da versão",
+  sha: "e7b93c1",
   author: "Self Construct Agent",
   environment: "Produção / Ao vivo",
   changelog: [
+    { version: "v1.3.0", message: "Adicionar aba completa de Diagnóstico dos Clientes e destaque visual da versão", date: "Hoje" },
     { version: "v1.2.2", message: "Adicionar banner e badge fixo com versão e mensagem do commit em destaque", date: "Hoje" },
     { version: "v1.2.1", message: "Re-deploy e sincronização da versão da plataforma", date: "Hoje" },
     { version: "v1.2.0", message: "Adicionar numeração de versão nos commits e visualização interativa do commit atual", date: "Hoje" },
