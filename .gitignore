@@ -23,6 +23,9 @@ pnpm-debug.log*
 .idea/
 .vscode/
 
-# Runtime temporary files
+# Runtime temporary files and persistent databases
 .tmp/
 tmp/
+data/
+*.db
+*.db.tmp*
