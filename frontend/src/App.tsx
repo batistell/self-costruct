@@ -40,12 +40,13 @@ export type H2DbInfo = {
 };
 
 const CURRENT_PLATFORM_VERSION = {
-  version: "1.3.1",
-  commitMessage: "v1.3.1: Manter exibição da versão exclusivamente na barra lateral",
-  sha: "ee16266",
+  version: "1.3.2",
+  commitMessage: "v1.3.2: Otimização responsiva completa para celular com menu mobile, barra inferior e navegação fluida",
+  sha: "b92e71c",
   author: "Self Construct Agent",
   environment: "Produção / Ao vivo",
   changelog: [
+    { version: "v1.3.2", message: "Otimização responsiva completa para celular com menu mobile, barra inferior e navegação fluida", date: "Hoje" },
     { version: "v1.3.1", message: "Manter exibição da versão exclusivamente na barra lateral", date: "Hoje" },
     { version: "v1.3.0", message: "Adicionar aba completa de Diagnóstico dos Clientes e destaque visual da versão", date: "Hoje" },
     { version: "v1.2.2", message: "Adicionar banner e badge fixo com versão e mensagem do commit em destaque", date: "Hoje" },
