@@ -40,12 +40,13 @@ export type H2DbInfo = {
 };
 
 const CURRENT_PLATFORM_VERSION = {
-  version: "1.3.3",
-  commitMessage: "v1.3.3: Corrigir URL dinâmica do preview para acesso no celular e tablets via IP de rede",
-  sha: "a93b4ef",
+  version: "1.3.4",
+  commitMessage: "v1.3.4: Chat como aba lateral deslizante (drawer) no celular e tablets",
+  sha: "b49a1ef",
   author: "Self Construct Agent",
   environment: "Produção / Ao vivo",
   changelog: [
+    { version: "v1.3.4", message: "Chat como aba lateral deslizante (drawer) no celular e tablets", date: "Hoje" },
     { version: "v1.3.3", message: "Corrigir URL dinâmica do preview para acesso no celular e tablets via IP de rede", date: "Hoje" },
     { version: "v1.3.2", message: "Otimização responsiva completa para celular com gaveta lateral e navegação inferior", date: "Hoje" },
     { version: "v1.3.1", message: "Manter exibição da versão exclusivamente na barra lateral", date: "Hoje" },
@@ -281,7 +282,7 @@ export default function App() {
   const [busy, setBusy] = useState(false);
   const [previewKey, setPreviewKey] = useState(0);
   const [isChatCollapsed, setIsChatCollapsed] = useState(false);
-  const [mobileView, setMobileView] = useState<"site" | "chat">("site");
+  const [isMobileChatOpen, setIsMobileChatOpen] = useState(false);
   const [isDragOver, setIsDragOver] = useState(false);
   const [h2Info, setH2Info] = useState<H2DbInfo | null>(null);
 
@@ -356,7 +357,7 @@ export default function App() {
     if (!isLoadingChat) {
       messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
     }
-  }, [messages, busy, attachments, isLoadingChat]);
+  }, [messages, busy, attachments, isLoadingChat, isMobileChatOpen]);
 
   const processFiles = (fileList: FileList | File[]) => {
     const filesArray = Array.from(fileList);
@@ -704,37 +705,43 @@ export default function App() {
 
   return (
     <>
-      {/* Mobile Top View Switcher */}
-      <div className="mobileViewSwitcher">
-        <button
-          className={`mobileSwitchBtn ${mobileView === "site" ? "active" : ""}`}
-          onClick={() => setMobileView("site")}
-        >
-          📱 Ver Site
-        </button>
-        <button
-          className={`mobileSwitchBtn ${mobileView === "chat" ? "active" : ""}`}
-          onClick={() => setMobileView("chat")}
-        >
-          💬 Chat Agente
-        </button>
-      </div>
+      {/* Floating Side Tab Handle on Mobile to open chat drawer anytime */}
+      <button
+        type="button"
+        className={`floatingChatSideTab ${isMobileChatOpen ? "hidden" : ""}`}
+        onClick={() => setIsMobileChatOpen(true)}
+        aria-label="Abrir aba lateral do chat"
+        title="Abrir Chat do Agente"
+      >
+        <span className="floatingChatIcon">💬</span>
+        <span className="floatingChatText">Chat Agente</span>
+        {busy && <span className="floatingBusyDot" />}
+      </button>
+
+      {/* Backdrop overlay for mobile drawer */}
+      {isMobileChatOpen && (
+        <div
+          className="mobileChatBackdrop"
+          onClick={() => setIsMobileChatOpen(false)}
+          aria-label="Fechar aba lateral do chat"
+        />
+      )}
 
       <main
-        className={`shell ${isChatCollapsed ? "collapsed" : ""} mobile-view-${mobileView}`}
+        className={`shell ${isChatCollapsed ? "collapsed" : ""} ${isMobileChatOpen ? "mobile-drawer-open" : ""}`}
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
       >
-        <section className={`agentPane ${isDragOver ? "drag-active" : ""}`}>
+        <section className={`agentPane ${isMobileChatOpen ? "mobile-open" : ""} ${isDragOver ? "drag-active" : ""}`}>
           <header>
             <div>
               <strong>SELF CONSTRUCT</strong>
               <div className="headerSubRow">
-                <span>Log & Execução em Tempo Real no GitHub</span>
+                <span>Log & Execução em Tempo Real</span>
                 {h2Info && (
                   <span className="h2Badge" title={`Arquivo H2: ${h2Info.filePath || "data/h2_messages.db"}`}>
-                    💾 H2: {h2Info.totalMessages ?? messages.length} msg(s)
+                    💾 {h2Info.totalMessages ?? messages.length} msgs
                   </span>
                 )}
               </div>
@@ -747,16 +754,27 @@ export default function App() {
                 title="Limpar mensagens do chat e banco H2"
                 disabled={busy}
               >
-                🗑️ Limpar
+                🗑️
               </button>
+              {/* Desktop collapse button */}
               <button
                 type="button"
-                className="toggleBtn"
+                className="toggleBtn desktopOnlyBtn"
                 onClick={() => setIsChatCollapsed(true)}
                 title="Recolher menu do chat"
                 aria-label="Recolher menu do chat"
               >
                 ◀ Recolher
+              </button>
+              {/* Mobile close drawer button */}
+              <button
+                type="button"
+                className="toggleBtn mobileCloseBtn"
+                onClick={() => setIsMobileChatOpen(false)}
+                title="Fechar aba lateral"
+                aria-label="Fechar aba lateral"
+              >
+                ✕ Fechar
               </button>
             </div>
           </header>
@@ -906,10 +924,10 @@ export default function App() {
                   busy
                     ? "Agente trabalhando no repositório..."
                     : attachments.length > 0
-                    ? "Descreva o que fazer com os anexos (Enter para enviar)..."
-                    : "Descreva o que alterar ou cole imagens/arquivos (Enter para enviar)..."
+                    ? "Descreva o que fazer com os anexos..."
+                    : "Descreva o que alterar..."
                 }
-                rows={attachments.length > 0 ? 2 : 3}
+                rows={attachments.length > 0 ? 2 : 2}
                 disabled={busy}
               />
 
@@ -918,7 +936,7 @@ export default function App() {
                 disabled={busy || (!input.trim() && attachments.length === 0)}
                 type="submit"
               >
-                {busy ? "Executando…" : "Enviar"}
+                {busy ? "…" : "Enviar"}
               </button>
             </div>
           </form>
@@ -927,10 +945,11 @@ export default function App() {
         <section className="previewPane">
           <header>
             <div className="previewHeaderLeft">
+              {/* Desktop open chat button */}
               {isChatCollapsed && (
                 <button
                   type="button"
-                  className="toggleBtn expandChatBtn"
+                  className="toggleBtn expandChatBtn desktopOnlyBtn"
                   onClick={() => setIsChatCollapsed(false)}
                   title="Expandir menu do chat"
                   aria-label="Expandir menu do chat"
@@ -938,6 +957,18 @@ export default function App() {
                   💬 Abrir Chat
                 </button>
               )}
+
+              {/* Mobile side drawer trigger button */}
+              <button
+                type="button"
+                className="toggleBtn mobileChatDrawerBtn"
+                onClick={() => setIsMobileChatOpen(true)}
+                title="Abrir aba lateral do chat"
+                aria-label="Abrir aba lateral do chat"
+              >
+                💬 Chat {busy ? "(Executando...)" : ""}
+              </button>
+
               <strong>Pré-visualização ao vivo</strong>
             </div>
             <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
