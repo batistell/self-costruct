@@ -294,14 +294,14 @@ function ClientsDiagnosticSection() {
           <small className="clientKpiSub">Status geral saudável</small>
         </div>
         <div className="card clientKpiCard alertCard">
-          <span className="clientKpiLabel">CASOS PRIORITÁRIOS / RISCO</span>
+          <span className="clientKpiLabel">CASOS PRIORITÁRIOS</span>
           <b className="clientKpiVal alert">{priorityCount}</b>
-          <small className="clientKpiSub">Requerem atenção ou intervenção</small>
+          <small className="clientKpiSub">Atenção requerida</small>
         </div>
         <div className="card clientKpiCard">
           <span className="clientKpiLabel">ADESÃO AO TRATAMENTO</span>
           <b className="clientKpiVal success">89%</b>
-          <small className="clientKpiSub">Comparecimento e pontualidade</small>
+          <small className="clientKpiSub">Assiduidade geral</small>
         </div>
       </div>
 
@@ -722,7 +722,10 @@ export default function App() {
         <div className="sidebarTopBar">
           <button className="brand" onClick={() => handleNavClick("dashboard")}>
             <span className="brandMark">DP</span>
-            <span><b>Dentista</b><small>de Propósito</small></span>
+            <div className="brandText">
+              <b>Dentista</b>
+              <small>de Propósito</small>
+            </div>
           </button>
           <button
             className="mobileMenuCloseBtn"
@@ -802,22 +805,28 @@ export default function App() {
               <span className="hamburgerIcon">☰</span>
               <span className="menuLabel">Menu</span>
             </button>
-            <div className="headerTitleWrapper">
+            <div className="headerBrandGroup" onClick={() => handleNavClick("dashboard")}>
+              <span className="headerBrandMark">DP</span>
               <span className="headerTitle">Dentista de Propósito</span>
-              {section === "clientsDiagnostic" && (
-                <span className="headerSectionPill">
-                  👥 Clientes
-                </span>
-              )}
             </div>
           </div>
 
           <div className="headerActionsRow">
-            <button className="headerActionButton primaryAccent" onClick={() => handleNavClick("clientsDiagnostic")}>
-              👥 Clientes
+            <button
+              className={`headerActionButton ${section === "clientsDiagnostic" ? "primaryAccent" : ""}`}
+              onClick={() => handleNavClick("clientsDiagnostic")}
+              title="Diagnóstico dos Clientes"
+            >
+              <span className="headerBtnIcon">👥</span>
+              <span className="headerBtnText">Clientes</span>
             </button>
-            <button className="headerActionButton" onClick={() => handleNavClick("profile")}>
-              👤 Matheus
+            <button
+              className={`headerActionButton userPillBtn ${section === "profile" ? "active" : ""}`}
+              onClick={() => handleNavClick("profile")}
+              title="Meu Perfil"
+            >
+              <span className="userAvatarDot">M</span>
+              <span className="headerBtnText">Matheus</span>
             </button>
           </div>
         </header>
