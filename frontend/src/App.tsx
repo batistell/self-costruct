@@ -94,10 +94,7 @@ function ActivityList({ activities, isLive }: { activities: ActivityItem[]; isLi
       <div className="activityLogHeader" onClick={() => setIsOpen(!isOpen)} role="button" tabIndex={0}>
         <div className="activityLogTitle">
           <span className="activityLogIcon">{isLive ? "⚡" : "📋"}</span>
-          <strong>Log de Operações GitHub & Sistema</strong>
-          <span className="activityCounter">
-            {activities.length} {activities.length === 1 ? "ação" : "ações"}
-          </span>
+          <strong>Processamento & Ações no GitHub ({activities.length})</strong>
           {runningCount > 0 && <span className="badge-running-pill">Executando ({runningCount})</span>}
           {errorCount > 0 && <span className="badge-error-pill">{errorCount} erro(s)</span>}
         </div>
@@ -449,6 +446,10 @@ export default function App() {
     const userMessageId = `user_${Date.now()}`;
     const assistantMessageId = `asst_${Date.now()}`;
 
+    const previousHistory = messages
+      .filter((m) => m.text && m.text.trim())
+      .map((m) => ({ role: m.role, text: m.text }));
+
     setMessages((current) => [
       ...current,
       {
@@ -461,7 +462,7 @@ export default function App() {
         id: assistantMessageId,
         role: "assistant",
         text: "",
-        status: "Conectando ao agente e analisando...",
+        status: "Iniciando processamento com a IA...",
         activities: [],
         isLive: true,
       },
@@ -477,6 +478,7 @@ export default function App() {
         body: JSON.stringify({
           message: messageText,
           files: currentAttachments,
+          history: previousHistory,
           stream: true,
           userMessageId,
           assistantMessageId,
@@ -548,7 +550,7 @@ export default function App() {
                       hasDeployed = true;
                     }
 
-                    return { ...msg, activities: currentActs };
+                    return { ...msg, activities: currentActs, status: "Processando próximos passos..." };
                   }
 
                   if (eventData.type === "done") {
@@ -725,9 +727,9 @@ export default function App() {
                   <MessageAttachmentsView attachments={message.attachments} />
                 )}
 
-                {message.isLive && message.status && (
+                {message.status && (
                   <div className="liveStatusBanner">
-                    <span className="spinnerIcon small" />
+                    {message.isLive && <span className="spinnerIcon small" />}
                     <span>{message.status}</span>
                   </div>
                 )}
@@ -766,7 +768,7 @@ export default function App() {
                   </div>
                 ) : message.text ? (
                   <p className="messageText">{message.text}</p>
-                ) : message.isLive ? null : (
+                ) : message.isLive ? null : (message.activities && message.activities.length > 0) ? null : (
                   <p className="messageText muted">Nenhuma mensagem textual retornada.</p>
                 )}
               </article>
