@@ -2,8 +2,8 @@ import "dotenv/config";
 import express from "express";
 import { runAgent } from "./agent.js";
 
-if (!process.env.OPENAI_API_KEY) {
-  console.error("OPENAI_API_KEY is missing. Create a local .env file before starting Self Construct.");
+if (!process.env.GEMINI_API_KEY) {
+  console.error("GEMINI_API_KEY is missing. Create a local .env file before starting Self Construct.");
   process.exit(1);
 }
 
