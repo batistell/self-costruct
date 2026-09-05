@@ -28,6 +28,8 @@ function getInitialSection(): Section {
   return "dashboard";
 }
 
+type ComorbidityRisk = "Nenhum" | "Baixo" | "Moderado" | "Alto";
+
 type ClientDiagnosticItem = {
   id: string;
   name: string;
@@ -38,6 +40,9 @@ type ClientDiagnosticItem = {
   lastVisit: string;
   nextStep: string;
   mainIssue: string;
+  comorbidityCode: string;
+  comorbidityName: string;
+  comorbidityRisk: ComorbidityRisk;
   metrics: {
     periodontal: number;
     restorative: number;
@@ -58,6 +63,9 @@ const initialClients: ClientDiagnosticItem[] = [
     lastVisit: "02/05/2025",
     nextStep: "Moldagem para alinhador invisível",
     mainIssue: "Apinhamento moderado e profilaxia de rotina",
+    comorbidityCode: "CID-10: Z00.0",
+    comorbidityName: "Sem comorbidades sistêmicas (Paciente hígida)",
+    comorbidityRisk: "Nenhum",
     metrics: { periodontal: 90, restorative: 85, aesthetic: 70, prevention: 88, adherence: 95 }
   },
   {
@@ -70,6 +78,9 @@ const initialClients: ClientDiagnosticItem[] = [
     lastVisit: "28/04/2025",
     nextStep: "Raspagem subgengival quadrante 2 e 3",
     mainIssue: "Gengivite avançada com sangramento ao toque",
+    comorbidityCode: "CID-10: I10 / F17.2",
+    comorbidityName: "Hipertensão Arterial & Tabagismo Crônico (Risco Periodontal aumentado)",
+    comorbidityRisk: "Alto",
     metrics: { periodontal: 35, restorative: 60, aesthetic: 55, prevention: 40, adherence: 50 }
   },
   {
@@ -82,6 +93,9 @@ const initialClients: ClientDiagnosticItem[] = [
     lastVisit: "04/05/2025",
     nextStep: "Restauração em resina composta no elemento 16",
     mainIssue: "Cárie oclusal média e bruxismo noturno",
+    comorbidityCode: "CID-10: G47.63 / F41.1",
+    comorbidityName: "Bruxismo do Sono & Ansiedade Generalizada (Uso de placa miorrelaxante)",
+    comorbidityRisk: "Moderado",
     metrics: { periodontal: 80, restorative: 65, aesthetic: 85, prevention: 75, adherence: 90 }
   },
   {
@@ -94,6 +108,9 @@ const initialClients: ClientDiagnosticItem[] = [
     lastVisit: "15/04/2025",
     nextStep: "Check-up preventivo semestral em 6 meses",
     mainIssue: "Saúde bucal excelente, apenas manutenção",
+    comorbidityCode: "CID-10: Z00.0",
+    comorbidityName: "Nenhuma comorbidade sistêmica registrada (Hígido)",
+    comorbidityRisk: "Nenhum",
     metrics: { periodontal: 95, restorative: 92, aesthetic: 90, prevention: 94, adherence: 98 }
   },
   {
@@ -106,6 +123,9 @@ const initialClients: ClientDiagnosticItem[] = [
     lastVisit: "22/04/2025",
     nextStep: "Planejamento de implante no elemento 24",
     mainIssue: "Perda óssea localizada e ausência dental",
+    comorbidityCode: "CID-10: E11.9 / M81.0",
+    comorbidityName: "Diabetes Mellitus Tipo 2 & Osteoporose (Controle glicêmico pré-cirúrgico)",
+    comorbidityRisk: "Alto",
     metrics: { periodontal: 50, restorative: 45, aesthetic: 62, prevention: 55, adherence: 70 }
   },
   {
@@ -118,8 +138,25 @@ const initialClients: ClientDiagnosticItem[] = [
     lastVisit: "03/05/2025",
     nextStep: "Retorno de acompanhamento em 90 dias",
     mainIssue: "Reabilitação oral e clareamento finalizados",
+    comorbidityCode: "CID-10: I10",
+    comorbidityName: "Hipertensão Sistêmica Leve Controlada",
+    comorbidityRisk: "Baixo",
     metrics: { periodontal: 92, restorative: 96, aesthetic: 95, prevention: 92, adherence: 95 }
   }
+];
+
+const COMORBIDITY_PRESETS = [
+  { name: "Sem comorbidades sistêmicas (Hígido)", code: "CID-10: Z00.0", risk: "Nenhum" as ComorbidityRisk },
+  { name: "Hipertensão Arterial Sistêmica", code: "CID-10: I10", risk: "Moderado" as ComorbidityRisk },
+  { name: "Diabetes Mellitus Tipo 2", code: "CID-10: E11.9", risk: "Alto" as ComorbidityRisk },
+  { name: "Diabetes Mellitus Tipo 1", code: "CID-10: E10.9", risk: "Alto" as ComorbidityRisk },
+  { name: "Bruxismo do Sono / DTM", code: "CID-10: G47.63", risk: "Moderado" as ComorbidityRisk },
+  { name: "Tabagismo Crônico", code: "CID-10: F17.2", risk: "Alto" as ComorbidityRisk },
+  { name: "Cardiopatia Isquêmica / Valvar", code: "CID-10: I25.1", risk: "Alto" as ComorbidityRisk },
+  { name: "Osteoporose", code: "CID-10: M81.0", risk: "Moderado" as ComorbidityRisk },
+  { name: "Asma Brônquica", code: "CID-10: J45", risk: "Baixo" as ComorbidityRisk },
+  { name: "Coagulopatia / Uso de Anticoagulante", code: "CID-10: D68.9", risk: "Alto" as ComorbidityRisk },
+  { name: "Outra condição personalizada", code: "CID-10: Outro", risk: "Moderado" as ComorbidityRisk },
 ];
 
 const stages = [
@@ -241,12 +278,30 @@ function ClientsDiagnosticSection({
   const [newClientScore, setNewClientScore] = useState(75);
   const [newClientIssue, setNewClientIssue] = useState("");
   const [newClientNextStep, setNewClientNextStep] = useState("");
+  const [newClientComorbidityPreset, setNewClientComorbidityPreset] = useState("Hipertensão Arterial Sistêmica");
+  const [newClientComorbidityName, setNewClientComorbidityName] = useState("Hipertensão Arterial Sistêmica");
+  const [newClientComorbidityCode, setNewClientComorbidityCode] = useState("CID-10: I10");
+  const [newClientComorbidityRisk, setNewClientComorbidityRisk] = useState<ComorbidityRisk>("Moderado");
+
+  const handleComorbidityPresetChange = (presetName: string) => {
+    setNewClientComorbidityPreset(presetName);
+    const found = COMORBIDITY_PRESETS.find((p) => p.name === presetName);
+    if (found) {
+      setNewClientComorbidityName(found.name);
+      setNewClientComorbidityCode(found.code);
+      setNewClientComorbidityRisk(found.risk);
+    }
+  };
 
   const filteredClients = useMemo(() => {
     return clients.filter((c) => {
       const matchesFilter = filter === "Todos" || c.category === filter;
-      const matchesSearch = c.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                            c.mainIssue.toLowerCase().includes(searchTerm.toLowerCase());
+      const q = searchTerm.toLowerCase();
+      const matchesSearch =
+        c.name.toLowerCase().includes(q) ||
+        c.mainIssue.toLowerCase().includes(q) ||
+        c.comorbidityCode.toLowerCase().includes(q) ||
+        c.comorbidityName.toLowerCase().includes(q);
       return matchesFilter && matchesSearch;
     });
   }, [clients, filter, searchTerm]);
@@ -258,7 +313,7 @@ function ClientsDiagnosticSection({
   }, [clients]);
 
   const priorityCount = useMemo(() => {
-    return clients.filter((c) => c.category === "Prioritário" || c.overallScore < 60).length;
+    return clients.filter((c) => c.category === "Prioritário" || c.overallScore < 60 || c.comorbidityRisk === "Alto").length;
   }, [clients]);
 
   const handleAddClient = (e: React.FormEvent) => {
@@ -282,6 +337,9 @@ function ClientsDiagnosticSection({
       lastVisit: "Hoje",
       nextStep: newClientNextStep || "Avaliação de acompanhamento",
       mainIssue: newClientIssue || "Consulta diagnóstica geral",
+      comorbidityCode: newClientComorbidityCode || "CID-10: Z00.0",
+      comorbidityName: newClientComorbidityName || "Sem comorbidades registradas",
+      comorbidityRisk: newClientComorbidityRisk,
       metrics: {
         periodontal: Math.min(100, Math.max(20, newClientScore + Math.floor(Math.random() * 10 - 5))),
         restorative: Math.min(100, Math.max(20, newClientScore + Math.floor(Math.random() * 10 - 5))),
@@ -296,6 +354,8 @@ function ClientsDiagnosticSection({
     setNewClientName("");
     setNewClientIssue("");
     setNewClientNextStep("");
+    setNewClientComorbidityName("Hipertensão Arterial Sistêmica");
+    setNewClientComorbidityCode("CID-10: I10");
   };
 
   return (
@@ -304,7 +364,7 @@ function ClientsDiagnosticSection({
         <PageTitle
           eyebrow="CENTRAL CLÍNICA DE PACIENTES"
           title="Diagnóstico dos Clientes"
-          text="Acompanhe a saúde bucal, índice clínico, nível de adesão e planejamento de cada paciente."
+          text="Acompanhe a saúde bucal, índice clínico, códigos de comorbidade (CID-10) e planejamento de cada paciente."
         />
         <button className="primary addClientBtn" onClick={() => setShowNewModal(true)}>
           + Novo Diagnóstico de Cliente
@@ -324,9 +384,9 @@ function ClientsDiagnosticSection({
           <small className="clientKpiSub">Status geral saudável</small>
         </div>
         <div className="card clientKpiCard alertCard">
-          <span className="clientKpiLabel">CASOS PRIORITÁRIOS</span>
+          <span className="clientKpiLabel">ALERTA / ALTO RISCO</span>
           <b className="clientKpiVal alert">{priorityCount}</b>
-          <small className="clientKpiSub">Atenção requerida</small>
+          <small className="clientKpiSub">Casos prioritários & comorbidades</small>
         </div>
         <div className="card clientKpiCard">
           <span className="clientKpiLabel">ADESÃO AO TRATAMENTO</span>
@@ -386,7 +446,7 @@ function ClientsDiagnosticSection({
         <div className="clientSearchBox">
           <input
             type="text"
-            placeholder="Buscar por nome ou diagnóstico..."
+            placeholder="Buscar por nome, CID, comorbidade..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
@@ -431,8 +491,22 @@ function ClientsDiagnosticSection({
                 </div>
 
                 <div className="clientDiagBody">
+                  {/* Comorbidity & CID Code Badge */}
+                  <div className="diagComorbidityBox">
+                    <div className="comorbidityHead">
+                      <span className="diagLabel">COMORBIDADE & CÓDIGO CLÍNICO:</span>
+                      <span className={`riskBadge risk-${client.comorbidityRisk.toLowerCase()}`}>
+                        {client.comorbidityRisk === "Nenhum" ? "Hígido / Sem Risco" : `Risco ${client.comorbidityRisk}`}
+                      </span>
+                    </div>
+                    <div className="comorbidityCodeRow">
+                      <code className="cidCodeBadge">{client.comorbidityCode}</code>
+                      <span className="comorbidityText">{client.comorbidityName}</span>
+                    </div>
+                  </div>
+
                   <div className="diagIssueBox">
-                    <span className="diagLabel">DIAGNÓSTICO PRINCIPAL:</span>
+                    <span className="diagLabel">DIAGNÓSTICO ODONTOLÓGICO:</span>
                     <p>{client.mainIssue}</p>
                   </div>
 
@@ -530,8 +604,25 @@ function ClientsDiagnosticSection({
                 </div>
               </div>
 
+              {/* Comorbidity & CID Details */}
+              <div className="diagComorbidityDetailBox">
+                <div className="comorbidityDetailHead">
+                  <span className="versionLabel">COMORBIDADE SISTÊMICA & CÓDIGO CID</span>
+                  <span className={`riskBadge risk-${selectedClient.comorbidityRisk.toLowerCase()}`}>
+                    {selectedClient.comorbidityRisk === "Nenhum" ? "Hígido / Sem Risco" : `Grau de Risco: ${selectedClient.comorbidityRisk}`}
+                  </span>
+                </div>
+                <div className="comorbidityDetailMain">
+                  <code className="cidCodeBadge big">{selectedClient.comorbidityCode}</code>
+                  <strong className="comorbidityDetailTitle">{selectedClient.comorbidityName}</strong>
+                </div>
+                <small className="comorbidityClinicalNote">
+                  ℹ️ Alerta Clínico Odontológico: Considere este diagnóstico sistêmico ao prescrever medicamentos, anestésicos com vasoconstritores e ao planejar intervenções cirúrgicas ou periodontais.
+                </small>
+              </div>
+
               <div className="versionInfoBox">
-                <span className="versionLabel">QUADRO CLÍNICO & DIAGNÓSTICO</span>
+                <span className="versionLabel">QUADRO CLÍNICO & DIAGNÓSTICO ODONTOLÓGICO</span>
                 <p className="commitMessageText">{selectedClient.mainIssue}</p>
               </div>
 
@@ -593,7 +684,7 @@ function ClientsDiagnosticSection({
                 <span className="versionPill">+ Novo</span>
                 <div>
                   <h3 style={{ margin: 0 }}>Novo Diagnóstico de Paciente</h3>
-                  <small>Cadastre um novo caso clínico na plataforma</small>
+                  <small>Cadastre um novo caso clínico e código de comorbidade</small>
                 </div>
               </div>
               <button className="versionCloseBtn" onClick={() => setShowNewModal(false)} aria-label="Fechar formulário" title="Pressione Backspace ou Esc para fechar">✕</button>
@@ -646,6 +737,74 @@ function ClientsDiagnosticSection({
                   </div>
                 </div>
 
+                {/* Comorbidity & CID Fields */}
+                <div style={{ background: "#f0fdf4", border: "1px solid #a7f3d0", borderRadius: 10, padding: 12 }}>
+                  <label style={{ fontSize: 11, fontWeight: 800, color: "#065f46", display: "block", marginBottom: 6 }}>
+                    🏥 COMORBIDADE SISTÊMICA & CÓDIGO CID-10
+                  </label>
+                  <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                    <div>
+                      <span style={{ fontSize: 10, fontWeight: 700, color: "#134e4a", display: "block", marginBottom: 3 }}>
+                        Selecionar Modelo Pré-definido:
+                      </span>
+                      <select
+                        value={newClientComorbidityPreset}
+                        onChange={(e) => handleComorbidityPresetChange(e.target.value)}
+                        style={{ width: "100%", padding: "8px 10px", borderRadius: 6, border: "1px solid #a7f3d0", fontSize: 12, background: "#fff" }}
+                      >
+                        {COMORBIDITY_PRESETS.map((p) => (
+                          <option key={p.name} value={p.name}>
+                            {p.name} ({p.code})
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div className="grid two" style={{ gap: 8 }}>
+                      <div>
+                        <span style={{ fontSize: 10, fontWeight: 700, color: "#134e4a", display: "block", marginBottom: 3 }}>
+                          Código CID-10:
+                        </span>
+                        <input
+                          type="text"
+                          value={newClientComorbidityCode}
+                          onChange={(e) => setNewClientComorbidityCode(e.target.value)}
+                          placeholder="Ex: CID-10: I10"
+                          style={{ width: "100%", padding: "8px 10px", borderRadius: 6, border: "1px solid #a7f3d0", fontSize: 12, background: "#fff", fontWeight: 700, color: "#047857" }}
+                        />
+                      </div>
+                      <div>
+                        <span style={{ fontSize: 10, fontWeight: 700, color: "#134e4a", display: "block", marginBottom: 3 }}>
+                          Grau de Risco Sistêmico:
+                        </span>
+                        <select
+                          value={newClientComorbidityRisk}
+                          onChange={(e) => setNewClientComorbidityRisk(e.target.value as ComorbidityRisk)}
+                          style={{ width: "100%", padding: "8px 10px", borderRadius: 6, border: "1px solid #a7f3d0", fontSize: 12, background: "#fff" }}
+                        >
+                          <option value="Nenhum">Nenhum (Hígido)</option>
+                          <option value="Baixo">Baixo Risco</option>
+                          <option value="Moderado">Risco Moderado</option>
+                          <option value="Alto">Alto Risco</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    <div>
+                      <span style={{ fontSize: 10, fontWeight: 700, color: "#134e4a", display: "block", marginBottom: 3 }}>
+                        Descrição da Comorbidade / Condição:
+                      </span>
+                      <input
+                        type="text"
+                        value={newClientComorbidityName}
+                        onChange={(e) => setNewClientComorbidityName(e.target.value)}
+                        placeholder="Ex: Hipertensão Arterial Sistêmica controlada"
+                        style={{ width: "100%", padding: "8px 10px", borderRadius: 6, border: "1px solid #a7f3d0", fontSize: 12, background: "#fff" }}
+                      />
+                    </div>
+                  </div>
+                </div>
+
                 <div>
                   <label style={{ fontSize: 11, fontWeight: 700, color: "#134e4a", display: "block", marginBottom: 5 }}>
                     Pontuação do Diagnóstico (0 - 100): <strong>{newClientScore}</strong>
@@ -662,7 +821,7 @@ function ClientsDiagnosticSection({
 
                 <div>
                   <label style={{ fontSize: 11, fontWeight: 700, color: "#134e4a", display: "block", marginBottom: 5 }}>
-                    Diagnóstico Principal / Queixa
+                    Diagnóstico Odontológico Principal / Queixa
                   </label>
                   <input
                     type="text"
@@ -1082,7 +1241,7 @@ function Dashboard({
         <div className="quickCalloutLeft">
           <span className="eyebrow gold">NOVA FERRAMENTA</span>
           <h3>Diagnóstico dos Clientes / Pacientes</h3>
-          <p>Avalie a saúde bucal, tratamentos e índice clínico dos seus pacientes em tempo real.</p>
+          <p>Avalie a saúde bucal, códigos de comorbidades (CID-10) e índice clínico dos seus pacientes em tempo real.</p>
         </div>
         <div className="quickCalloutRight">
           <div className="quickScorePill"><b>{initialClients.length}</b> Pacientes Ativos</div>
