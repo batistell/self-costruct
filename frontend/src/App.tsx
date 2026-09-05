@@ -41,12 +41,12 @@ export type H2DbInfo = {
 
 const CURRENT_PLATFORM_VERSION = {
   version: "1.3.2",
-  commitMessage: "v1.3.2: Otimização responsiva completa para celular com menu mobile, barra inferior e navegação fluida",
-  sha: "b92e71c",
+  commitMessage: "v1.3.2: Otimização responsiva completa para celulares e tablets com menu mobile e barra de navegação",
+  sha: "2c94c8a",
   author: "Self Construct Agent",
   environment: "Produção / Ao vivo",
   changelog: [
-    { version: "v1.3.2", message: "Otimização responsiva completa para celular com menu mobile, barra inferior e navegação fluida", date: "Hoje" },
+    { version: "v1.3.2", message: "Otimização responsiva completa para celulares e tablets com menu mobile e barra de navegação", date: "Hoje" },
     { version: "v1.3.1", message: "Manter exibição da versão exclusivamente na barra lateral", date: "Hoje" },
     { version: "v1.3.0", message: "Adicionar aba completa de Diagnóstico dos Clientes e destaque visual da versão", date: "Hoje" },
     { version: "v1.2.2", message: "Adicionar banner e badge fixo com versão e mensagem do commit em destaque", date: "Hoje" },
@@ -280,9 +280,9 @@ export default function App() {
   const [busy, setBusy] = useState(false);
   const [previewKey, setPreviewKey] = useState(0);
   const [isChatCollapsed, setIsChatCollapsed] = useState(false);
+  const [mobileView, setMobileView] = useState<"site" | "chat">("site");
   const [isDragOver, setIsDragOver] = useState(false);
   const [h2Info, setH2Info] = useState<H2DbInfo | null>(null);
-  const [showVersionModal, setShowVersionModal] = useState(false);
 
   // Message inline editing states
   const [editingMessageId, setEditingMessageId] = useState<string | null>(null);
@@ -686,230 +686,248 @@ export default function App() {
   }
 
   return (
-    <main
-      className={`shell ${isChatCollapsed ? "collapsed" : ""}`}
-      onDragOver={handleDragOver}
-      onDragLeave={handleDragLeave}
-      onDrop={handleDrop}
-    >
-      <section className={`agentPane ${isDragOver ? "drag-active" : ""}`}>
-        <header>
-          <div>
-            <strong>SELF CONSTRUCT</strong>
-            <div className="headerSubRow">
-              <span>Log & Execução em Tempo Real no GitHub</span>
-              {h2Info && (
-                <span className="h2Badge" title={`Arquivo H2: ${h2Info.filePath || "data/h2_messages.db"}`}>
-                  💾 H2: {h2Info.totalMessages ?? messages.length} msg(s)
-                </span>
-              )}
+    <>
+      {/* Mobile Top View Switcher */}
+      <div className="mobileViewSwitcher">
+        <button
+          className={`mobileSwitchBtn ${mobileView === "site" ? "active" : ""}`}
+          onClick={() => setMobileView("site")}
+        >
+          📱 Ver Site
+        </button>
+        <button
+          className={`mobileSwitchBtn ${mobileView === "chat" ? "active" : ""}`}
+          onClick={() => setMobileView("chat")}
+        >
+          💬 Chat Agente
+        </button>
+      </div>
+
+      <main
+        className={`shell ${isChatCollapsed ? "collapsed" : ""} mobile-view-${mobileView}`}
+        onDragOver={handleDragOver}
+        onDragLeave={handleDragLeave}
+        onDrop={handleDrop}
+      >
+        <section className={`agentPane ${isDragOver ? "drag-active" : ""}`}>
+          <header>
+            <div>
+              <strong>SELF CONSTRUCT</strong>
+              <div className="headerSubRow">
+                <span>Log & Execução em Tempo Real no GitHub</span>
+                {h2Info && (
+                  <span className="h2Badge" title={`Arquivo H2: ${h2Info.filePath || "data/h2_messages.db"}`}>
+                    💾 H2: {h2Info.totalMessages ?? messages.length} msg(s)
+                  </span>
+                )}
+              </div>
             </div>
-          </div>
-          <div className="headerActions">
-            <button
-              type="button"
-              className="toggleBtn iconOnly"
-              onClick={handleClearChat}
-              title="Limpar mensagens do chat e banco H2"
-              disabled={busy}
-            >
-              🗑️ Limpar
-            </button>
-            <button
-              type="button"
-              className="toggleBtn"
-              onClick={() => setIsChatCollapsed(true)}
-              title="Recolher menu do chat"
-              aria-label="Recolher menu do chat"
-            >
-              ◀ Recolher
-            </button>
-          </div>
-        </header>
-
-        <div className="messages">
-          {messages.map((message) => {
-            const isEditing = editingMessageId === message.id;
-
-            return (
-              <article key={message.id} className={`${message.role} ${message.isLive ? "live-article" : ""}`}>
-                <div className="messageHeader">
-                  <b>{message.role === "user" ? "👤 Você" : "🤖 Agente"}</b>
-                  <div className="messageHeaderActions">
-                    {message.isLive && (
-                      <span className="liveBadge">
-                        <span className="pulseDot" /> AO VIVO
-                      </span>
-                    )}
-                    {!message.isLive && (
-                      <>
-                        <button
-                          type="button"
-                          className="msgActionBtn"
-                          onClick={() => (isEditing ? cancelEditingMessage() : startEditingMessage(message))}
-                          title={isEditing ? "Cancelar edição" : "Alterar / Editar mensagem"}
-                          aria-label="Editar mensagem"
-                        >
-                          ✏️
-                        </button>
-                        <button
-                          type="button"
-                          className="msgActionBtn delete"
-                          onClick={() => handleDeleteMessage(message.id)}
-                          title="Excluir esta mensagem"
-                          aria-label="Excluir mensagem"
-                        >
-                          🗑️
-                        </button>
-                      </>
-                    )}
-                  </div>
-                </div>
-
-                {message.attachments && message.attachments.length > 0 && (
-                  <MessageAttachmentsView attachments={message.attachments} />
-                )}
-
-                {message.status && (
-                  <div className="liveStatusBanner">
-                    {message.isLive && <span className="spinnerIcon small" />}
-                    <span>{message.status}</span>
-                  </div>
-                )}
-
-                {message.activities && message.activities.length > 0 && (
-                  <ActivityList activities={message.activities} isLive={message.isLive} />
-                )}
-
-                {isEditing ? (
-                  <div className="msgEditContainer">
-                    <textarea
-                      className="msgEditTextarea"
-                      value={editingText}
-                      onChange={(e) => setEditingText(e.target.value)}
-                      rows={3}
-                      autoFocus
-                    />
-                    <div className="msgEditButtons">
-                      <button
-                        type="button"
-                        className="msgSaveBtn"
-                        onClick={() => saveEditedMessage(message.id)}
-                        disabled={savingEdit}
-                      >
-                        {savingEdit ? "Salvando..." : "Salvar"}
-                      </button>
-                      <button
-                        type="button"
-                        className="msgCancelBtn"
-                        onClick={cancelEditingMessage}
-                        disabled={savingEdit}
-                      >
-                        Cancelar
-                      </button>
-                    </div>
-                  </div>
-                ) : message.text ? (
-                  <p className="messageText">{message.text}</p>
-                ) : message.isLive ? null : (message.activities && message.activities.length > 0) ? null : (
-                  <p className="messageText muted">Nenhuma mensagem textual retornada.</p>
-                )}
-              </article>
-            );
-          })}
-          <div ref={messagesEndRef} />
-        </div>
-
-        {isDragOver && (
-          <div className="dragDropOverlay">
-            <div className="dragDropCard">
-              <span className="dragIcon">📥</span>
-              <strong>Solte os arquivos aqui</strong>
-              <span>Eles serão anexados para análise</span>
-            </div>
-          </div>
-        )}
-
-        <form onSubmit={submit} className="chatForm">
-          <input
-            type="file"
-            ref={fileInputRef}
-            onChange={handleFileInputChange}
-            multiple
-            style={{ display: "none" }}
-            aria-hidden="true"
-          />
-
-          <AttachmentPreviewList
-            attachments={attachments}
-            onRemove={removeAttachment}
-            onClearAll={() => setAttachments([])}
-          />
-
-          <div className="inputRow">
-            <button
-              type="button"
-              className="attachButton"
-              onClick={() => fileInputRef.current?.click()}
-              disabled={busy}
-              title="Anexar arquivos ou imagens"
-              aria-label="Anexar arquivos"
-            >
-              📎
-            </button>
-
-            <textarea
-              value={input}
-              onChange={(event) => setInput(event.target.value)}
-              onPaste={handlePaste}
-              onKeyDown={(event) => {
-                if (event.key === "Enter" && !event.shiftKey) {
-                  event.preventDefault();
-                  submit(event);
-                }
-              }}
-              placeholder={
-                busy
-                  ? "Agente trabalhando no repositório..."
-                  : attachments.length > 0
-                  ? "Descreva o que fazer com os anexos (Enter para enviar)..."
-                  : "Descreva o que alterar ou cole imagens/arquivos (Enter para enviar)..."
-              }
-              rows={attachments.length > 0 ? 2 : 3}
-              disabled={busy}
-            />
-
-            <button
-              className="sendBtn"
-              disabled={busy || (!input.trim() && attachments.length === 0)}
-              type="submit"
-            >
-              {busy ? "Executando…" : "Enviar"}
-            </button>
-          </div>
-        </form>
-      </section>
-
-      <section className="previewPane">
-        <header>
-          <div className="previewHeaderLeft">
-            {isChatCollapsed && (
+            <div className="headerActions">
               <button
                 type="button"
-                className="toggleBtn expandChatBtn"
-                onClick={() => setIsChatCollapsed(false)}
-                title="Expandir menu do chat"
-                aria-label="Expandir menu do chat"
+                className="toggleBtn iconOnly"
+                onClick={handleClearChat}
+                title="Limpar mensagens do chat e banco H2"
+                disabled={busy}
               >
-                💬 Abrir Chat
+                🗑️ Limpar
               </button>
-            )}
-            <strong>Pré-visualização ao vivo</strong>
+              <button
+                type="button"
+                className="toggleBtn"
+                onClick={() => setIsChatCollapsed(true)}
+                title="Recolher menu do chat"
+                aria-label="Recolher menu do chat"
+              >
+                ◀ Recolher
+              </button>
+            </div>
+          </header>
+
+          <div className="messages">
+            {messages.map((message) => {
+              const isEditing = editingMessageId === message.id;
+
+              return (
+                <article key={message.id} className={`${message.role} ${message.isLive ? "live-article" : ""}`}>
+                  <div className="messageHeader">
+                    <b>{message.role === "user" ? "👤 Você" : "🤖 Agente"}</b>
+                    <div className="messageHeaderActions">
+                      {message.isLive && (
+                        <span className="liveBadge">
+                          <span className="pulseDot" /> AO VIVO
+                        </span>
+                      )}
+                      {!message.isLive && (
+                        <>
+                          <button
+                            type="button"
+                            className="msgActionBtn"
+                            onClick={() => (isEditing ? cancelEditingMessage() : startEditingMessage(message))}
+                            title={isEditing ? "Cancelar edição" : "Alterar / Editar mensagem"}
+                            aria-label="Editar mensagem"
+                          >
+                            ✏️
+                          </button>
+                          <button
+                            type="button"
+                            className="msgActionBtn delete"
+                            onClick={() => handleDeleteMessage(message.id)}
+                            title="Excluir esta mensagem"
+                            aria-label="Excluir mensagem"
+                          >
+                            🗑️
+                          </button>
+                        </>
+                      )}
+                    </div>
+                  </div>
+
+                  {message.attachments && message.attachments.length > 0 && (
+                    <MessageAttachmentsView attachments={message.attachments} />
+                  )}
+
+                  {message.status && (
+                    <div className="liveStatusBanner">
+                      {message.isLive && <span className="spinnerIcon small" />}
+                      <span>{message.status}</span>
+                    </div>
+                  )}
+
+                  {message.activities && message.activities.length > 0 && (
+                    <ActivityList activities={message.activities} isLive={message.isLive} />
+                  )}
+
+                  {isEditing ? (
+                    <div className="msgEditContainer">
+                      <textarea
+                        className="msgEditTextarea"
+                        value={editingText}
+                        onChange={(e) => setEditingText(e.target.value)}
+                        rows={3}
+                        autoFocus
+                      />
+                      <div className="msgEditButtons">
+                        <button
+                          type="button"
+                          className="msgSaveBtn"
+                          onClick={() => saveEditedMessage(message.id)}
+                          disabled={savingEdit}
+                        >
+                          {savingEdit ? "Salvando..." : "Salvar"}
+                        </button>
+                        <button
+                          type="button"
+                          className="msgCancelBtn"
+                          onClick={cancelEditingMessage}
+                          disabled={savingEdit}
+                        >
+                          Cancelar
+                        </button>
+                      </div>
+                    </div>
+                  ) : message.text ? (
+                    <p className="messageText">{message.text}</p>
+                  ) : message.isLive ? null : (message.activities && message.activities.length > 0) ? null : (
+                    <p className="messageText muted">Nenhuma mensagem textual retornada.</p>
+                  )}
+                </article>
+              );
+            })}
+            <div ref={messagesEndRef} />
           </div>
-          <button onClick={() => setPreviewKey((value) => value + 1)}>Recarregar</button>
-        </header>
-        <iframe key={previewKey} src="http://127.0.0.1:5174" title="Pré-visualização do Self Construct" />
-      </section>
-    </main>
+
+          {isDragOver && (
+            <div className="dragDropOverlay">
+              <div className="dragDropCard">
+                <span className="dragIcon">📥</span>
+                <strong>Solte os arquivos aqui</strong>
+                <span>Eles serão anexados para análise</span>
+              </div>
+            </div>
+          )}
+
+          <form onSubmit={submit} className="chatForm">
+            <input
+              type="file"
+              ref={fileInputRef}
+              onChange={handleFileInputChange}
+              multiple
+              style={{ display: "none" }}
+              aria-hidden="true"
+            />
+
+            <AttachmentPreviewList
+              attachments={attachments}
+              onRemove={removeAttachment}
+              onClearAll={() => setAttachments([])}
+            />
+
+            <div className="inputRow">
+              <button
+                type="button"
+                className="attachButton"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={busy}
+                title="Anexar arquivos ou imagens"
+                aria-label="Anexar arquivos"
+              >
+                📎
+              </button>
+
+              <textarea
+                value={input}
+                onChange={(event) => setInput(event.target.value)}
+                onPaste={handlePaste}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter" && !event.shiftKey) {
+                    event.preventDefault();
+                    submit(event);
+                  }
+                }}
+                placeholder={
+                  busy
+                    ? "Agente trabalhando no repositório..."
+                    : attachments.length > 0
+                    ? "Descreva o que fazer com os anexos (Enter para enviar)..."
+                    : "Descreva o que alterar ou cole imagens/arquivos (Enter para enviar)..."
+                }
+                rows={attachments.length > 0 ? 2 : 3}
+                disabled={busy}
+              />
+
+              <button
+                className="sendBtn"
+                disabled={busy || (!input.trim() && attachments.length === 0)}
+                type="submit"
+              >
+                {busy ? "Executando…" : "Enviar"}
+              </button>
+            </div>
+          </form>
+        </section>
+
+        <section className="previewPane">
+          <header>
+            <div className="previewHeaderLeft">
+              {isChatCollapsed && (
+                <button
+                  type="button"
+                  className="toggleBtn expandChatBtn"
+                  onClick={() => setIsChatCollapsed(false)}
+                  title="Expandir menu do chat"
+                  aria-label="Expandir menu do chat"
+                >
+                  💬 Abrir Chat
+                </button>
+              )}
+              <strong>Pré-visualização ao vivo</strong>
+            </div>
+            <button onClick={() => setPreviewKey((value) => value + 1)}>Recarregar</button>
+          </header>
+          <iframe key={previewKey} src="http://127.0.0.1:5174" title="Pré-visualização do Self Construct" />
+        </section>
+      </main>
+    </>
   );
 }
