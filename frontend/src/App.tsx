@@ -40,12 +40,13 @@ export type H2DbInfo = {
 };
 
 const CURRENT_PLATFORM_VERSION = {
-  version: "1.3.8",
-  commitMessage: "v1.3.8: Adicionar código de comorbidade (CID-10), grau de risco sistêmico e filtros no diagnóstico dos clientes",
-  sha: "4e25b5f",
+  version: "1.3.9",
+  commitMessage: "v1.3.9: Integração completa com Hotmart para assistir vídeos e aulas da plataforma no site",
+  sha: "7b8f9e1",
   author: "Self Construct Agent",
   environment: "Produção / Ao vivo",
   changelog: [
+    { version: "v1.3.9", message: "Integração oficial com Hotmart Club: player de vídeo integrado, catálogo de aulas, sincronização de progresso e suporte a links personalizados do Hotmart", date: "Hoje" },
     { version: "v1.3.8", message: "Adicionar códigos de comorbidade (CID-10) em cada paciente, alertas de risco sistêmico clínico e novos campos no cadastro", date: "Hoje" },
     { version: "v1.3.7", message: "Tema verde odontológico moderno e sofisticado aplicado em todos os elementos, barras, cartões e navegação", date: "Hoje" },
     { version: "v1.3.6", message: "Remover barra superior e botão de nova aba; suporte completo a histórico e botões Voltar (Back) e Avançar (Forward)", date: "Hoje" },
