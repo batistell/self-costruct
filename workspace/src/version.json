@@ -1,11 +1,16 @@
 {
-  "version": "1.2.1",
-  "commitMessage": "v1.2.1: Re-deploy e sincronização da versão da plataforma",
-  "sha": "latest",
-  "date": "2025-05-10T13:00:00Z",
+  "version": "1.2.2",
+  "commitMessage": "v1.2.2: Adicionar banner e badge fixo com versão e mensagem do commit em destaque",
+  "sha": "14f8a92",
+  "date": "2025-05-10T13:30:00Z",
   "author": "Self Construct Agent",
   "environment": "Produção / Ao vivo",
   "changelog": [
+    {
+      "version": "v1.2.2",
+      "message": "Adicionar banner e badge fixo com versão e mensagem do commit em destaque",
+      "date": "Hoje"
+    },
     {
       "version": "v1.2.1",
       "message": "Re-deploy e sincronização da versão da plataforma",
@@ -29,11 +34,6 @@
     {
       "version": "v1.0.3",
       "message": "Personalização de dados de exemplo para Matheus Silva",
-      "date": "Hoje"
-    },
-    {
-      "version": "v1.0.2",
-      "message": "Carregamento e sincronização do histórico do chat no H2 Database",
       "date": "Hoje"
     }
   ]
