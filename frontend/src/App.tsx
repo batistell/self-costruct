@@ -40,20 +40,18 @@ export type H2DbInfo = {
 };
 
 const CURRENT_PLATFORM_VERSION = {
-  version: "1.3.4",
-  commitMessage: "v1.3.4: Chat como aba lateral deslizante (drawer) no celular e tablets",
-  sha: "b49a1ef",
+  version: "1.3.5",
+  commitMessage: "v1.3.5: Fechar dialogs com Backspace/Escape, ocultar recarregar no mobile e melhorias visuais",
+  sha: "c3f8e91",
   author: "Self Construct Agent",
   environment: "Produção / Ao vivo",
   changelog: [
+    { version: "v1.3.5", message: "Fechar dialogs e modais com Backspace e Escape, proteger fechamento de tela e ocultar recarregar no mobile", date: "Hoje" },
     { version: "v1.3.4", message: "Chat como aba lateral deslizante (drawer) no celular e tablets", date: "Hoje" },
     { version: "v1.3.3", message: "Corrigir URL dinâmica do preview para acesso no celular e tablets via IP de rede", date: "Hoje" },
     { version: "v1.3.2", message: "Otimização responsiva completa para celular com gaveta lateral e navegação inferior", date: "Hoje" },
     { version: "v1.3.1", message: "Manter exibição da versão exclusivamente na barra lateral", date: "Hoje" },
     { version: "v1.3.0", message: "Adicionar aba completa de Diagnóstico dos Clientes e destaque visual da versão", date: "Hoje" },
-    { version: "v1.2.2", message: "Adicionar banner e badge fixo com versão e mensagem do commit em destaque", date: "Hoje" },
-    { version: "v1.2.1", message: "Re-deploy e sincronização da versão da plataforma", date: "Hoje" },
-    { version: "v1.2.0", message: "Adicionar numeração de versão nos commits e visualização interativa do commit atual", date: "Hoje" },
   ]
 };
 
@@ -301,6 +299,26 @@ export default function App() {
       setPreviewUrl(`http://${hostname}:5174`);
     }
   }, []);
+
+  // Keyboard shortcut listener: Backspace or Escape closes mobile chat drawer if not typing in input
+  useEffect(() => {
+    function handleGlobalKeyDown(e: KeyboardEvent) {
+      if (isMobileChatOpen) {
+        const activeEl = document.activeElement as HTMLElement | null;
+        const isEditing = activeEl && (activeEl.tagName === "TEXTAREA" || activeEl.tagName === "INPUT" || activeEl.isContentEditable);
+        if ((e.key === "Backspace" && !isEditing) || e.key === "Escape") {
+          e.preventDefault();
+          e.stopPropagation();
+          setIsMobileChatOpen(false);
+        }
+      }
+    }
+
+    window.addEventListener("keydown", handleGlobalKeyDown, { capture: true });
+    return () => {
+      window.removeEventListener("keydown", handleGlobalKeyDown, { capture: true });
+    };
+  }, [isMobileChatOpen]);
 
   // Message inline editing states
   const [editingMessageId, setEditingMessageId] = useState<string | null>(null);
@@ -966,23 +984,31 @@ export default function App() {
                 title="Abrir aba lateral do chat"
                 aria-label="Abrir aba lateral do chat"
               >
-                💬 Chat {busy ? "(Executando...)" : ""}
+                💬 Chat {busy ? "(...)" : ""}
               </button>
 
               <strong>Pré-visualização ao vivo</strong>
             </div>
-            <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
+
+            <div className="previewHeaderActions">
               <a
                 href={previewUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="toggleBtn"
-                style={{ textDecoration: "none" }}
+                className="toggleBtn openTabBtn"
                 title="Abrir site diretamente em tela cheia / nova aba"
               >
                 ↗ Nova Aba
               </a>
-              <button onClick={() => setPreviewKey((value) => value + 1)}>Recarregar</button>
+              {/* Recarregar button only displayed on desktop to avoid cluttering mobile */}
+              <button
+                type="button"
+                className="desktopReloadBtn"
+                onClick={() => setPreviewKey((value) => value + 1)}
+                title="Recarregar tela"
+              >
+                Recarregar
+              </button>
             </div>
           </header>
           <iframe key={previewKey} src={previewUrl} title="Pré-visualização do Self Construct" />
