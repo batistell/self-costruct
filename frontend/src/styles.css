@@ -11,6 +11,8 @@ body,
   font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   background: #0b0d10;
   color: #eef2f6;
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
 }
 
 /* Loading screen before chat and workspace data are ready */
@@ -177,6 +179,43 @@ body,
   gap: 12px;
 }
 
+/* Mobile Top Navigation Switcher for Tablet / Mobile */
+.mobileViewSwitcher {
+  display: none;
+  position: fixed;
+  top: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 9999;
+  background: #1e293b;
+  border: 1px solid #334155;
+  border-radius: 999px;
+  padding: 3px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+  gap: 4px;
+}
+
+.mobileSwitchBtn {
+  border: none;
+  background: transparent;
+  color: #94a3b8;
+  padding: 6px 14px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.15s ease;
+}
+
+.mobileSwitchBtn.active {
+  background: #0284c7;
+  color: #ffffff;
+  box-shadow: 0 2px 8px rgba(2, 132, 199, 0.4);
+}
+
 .status {
   color: #34d399 !important;
   display: inline-flex;
@@ -223,6 +262,7 @@ body,
   display: flex;
   flex-direction: column;
   gap: 14px;
+  -webkit-overflow-scrolling: touch;
 }
 
 .messages article {
@@ -1053,26 +1093,55 @@ textarea:disabled {
   border: 0;
   flex: 1;
   width: 100%;
+  height: 100%;
   background: white;
 }
 
-@media (max-width: 800px) and (orientation: portrait) {
-  .shell {
-    grid-template-columns: 1fr;
-    grid-template-rows: 55% 45%;
-    transition: grid-template-rows 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+/* Mobile & Tablet Full Responsiveness */
+@media (max-width: 850px) {
+  .mobileViewSwitcher {
+    display: flex;
   }
 
-  .shell.collapsed {
-    grid-template-rows: 0px 1fr;
+  .shell {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    width: 100vw;
+    overflow: hidden;
+  }
+
+  .shell.mobile-view-chat .agentPane {
+    display: flex;
+    flex: 1;
+    height: 100vh;
+  }
+
+  .shell.mobile-view-chat .previewPane {
+    display: none;
+  }
+
+  .shell.mobile-view-site .agentPane {
+    display: none;
+  }
+
+  .shell.mobile-view-site .previewPane {
+    display: flex;
+    flex: 1;
+    height: 100vh;
   }
 
   .agentPane {
-    border-right: 0;
-    border-bottom: 1px solid #232830;
+    border-right: none;
+    padding-top: 48px; /* space for mobile view switcher */
   }
 
-  .shell.collapsed .agentPane {
-    border-bottom: none;
+  .previewPane header {
+    padding-top: 8px;
+    height: 52px;
+  }
+
+  .messages article.user {
+    max-width: 95%;
   }
 }
