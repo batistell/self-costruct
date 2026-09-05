@@ -1,7 +1,7 @@
 import "dotenv/config";
 import express from "express";
 import { runAgent } from "./agent.js";
-import { clearMessages, getH2Info, getMessages, initH2Database, saveMessage } from "./db.js";
+import { clearMessages, deleteMessage, getH2Info, getMessages, initH2Database, saveMessage, updateMessagePartial } from "./db.js";
 
 if (!process.env.GEMINI_API_KEY) {
   console.error("GEMINI_API_KEY is missing. Create a local .env file before starting Self Construct.");
@@ -49,7 +49,35 @@ app.post("/api/messages", (req, res) => {
   }
 });
 
-// Clear messages in H2 database file
+// Update a specific message by ID
+app.patch("/api/messages/:id", (req, res) => {
+  try {
+    const { id } = req.params;
+    const { text } = req.body;
+    if (typeof text !== "string") {
+      return res.status(400).json({ error: "text is required" });
+    }
+    const updated = updateMessagePartial(id, { text });
+    res.json({ ok: true, message: updated });
+  } catch (error) {
+    console.error("[backend/messages:patch]", error);
+    res.status(500).json({ error: error instanceof Error ? error.message : String(error) });
+  }
+});
+
+// Delete a specific message by ID
+app.delete("/api/messages/:id", (req, res) => {
+  try {
+    const { id } = req.params;
+    const deleted = deleteMessage(id);
+    res.json({ ok: true, deleted });
+  } catch (error) {
+    console.error("[backend/messages:delete:id]", error);
+    res.status(500).json({ error: error instanceof Error ? error.message : String(error) });
+  }
+});
+
+// Clear all messages in H2 database file
 app.delete("/api/messages", (_req, res) => {
   try {
     clearMessages();
