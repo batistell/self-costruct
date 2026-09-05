@@ -1,11 +1,16 @@
 {
-  "version": "1.3.2",
-  "commitMessage": "v1.3.2: Otimização responsiva completa para celular com gaveta lateral, navegação inferior e suporte a toque",
-  "sha": "0a954ba",
-  "date": "2025-05-10T15:10:00Z",
+  "version": "1.3.3",
+  "commitMessage": "v1.3.3: Corrigir carregamento do preview e responsividade para acesso mobile em rede local",
+  "sha": "89c9cb7",
+  "date": "2025-05-10T15:35:00Z",
   "author": "Self Construct Agent",
   "environment": "Produção / Ao vivo",
   "changelog": [
+    {
+      "version": "v1.3.3",
+      "message": "Corrigir carregamento do preview e responsividade para acesso mobile em rede local",
+      "date": "Hoje"
+    },
     {
       "version": "v1.3.2",
       "message": "Otimização responsiva completa para celular com gaveta lateral, navegação inferior e suporte a toque",
