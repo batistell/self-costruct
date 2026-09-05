@@ -5,6 +5,24 @@ const client = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 const model = process.env.GEMINI_MODEL ?? "gemini-3.7-flash";
 const supervisorUrl = process.env.SUPERVISOR_URL ?? "http://127.0.0.1:3002";
 
+export interface ActivityItem {
+  id: string;
+  tool: string;
+  args: any;
+  result?: unknown;
+  status: "running" | "success" | "error";
+  description: string;
+  startTime: number;
+  endTime?: number;
+}
+
+export type AgentEvent =
+  | { type: "status"; message: string }
+  | { type: "tool_start"; activity: ActivityItem }
+  | { type: "tool_end"; activity: ActivityItem }
+  | { type: "done"; text: string; activities: ActivityItem[] }
+  | { type: "error"; message: string };
+
 const functionDeclarations: any[] = [
   {
     name: "github_list_files",
@@ -62,6 +80,31 @@ const functionDeclarations: any[] = [
 
 const tools = [{ functionDeclarations }];
 
+function formatToolDescription(name: string, args: any): string {
+  switch (name) {
+    case "github_list_files": {
+      const p = args?.path ? `"${args.path}"` : "raiz do repositório";
+      return `Listando arquivos em ${p}`;
+    }
+    case "github_read_file":
+      return `Lendo arquivo "${args?.path || ""}"`;
+    case "github_write_file": {
+      const msg = args?.message ? ` (Commit: "${args.message}")` : "";
+      return `Gravando no GitHub: "${args?.path || ""}"${msg}`;
+    }
+    case "github_delete_file": {
+      const msg = args?.message ? ` (Commit: "${args.message}")` : "";
+      return `Removendo do GitHub: "${args?.path || ""}"${msg}`;
+    }
+    case "deploy_commit": {
+      const sha = (args?.sha || "").slice(0, 7);
+      return `Implantando commit SHA: ${sha || "HEAD"}`;
+    }
+    default:
+      return `Executando ${name}`;
+  }
+}
+
 async function executeTool(name: string, args: any) {
   switch (name) {
     case "github_list_files":
@@ -93,11 +136,18 @@ Each GitHub write returns a commit SHA. After completing all requested source ch
 Do not write secrets, API keys, tokens, .env contents, or credentials to GitHub. Keep secrets local.
 When a deploy fails, explain the error and inspect/revise the GitHub source if appropriate. Prefer small coherent changes and concise commit messages.`;
 
-export async function runAgent(message: string) {
+export async function runAgent(message: string, onEvent?: (event: AgentEvent) => void) {
   const contents: any[] = [{ role: "user", parts: [{ text: message }] }];
-  const activities: Array<{ tool: string; result: unknown }> = [];
+  const activities: ActivityItem[] = [];
+
+  onEvent?.({ type: "status", message: "Iniciando análise com a IA..." });
 
   for (let iteration = 0; iteration < 20; iteration += 1) {
+    onEvent?.({
+      type: "status",
+      message: iteration === 0 ? "Consultando modelo..." : `Analisando próximos passos (etapa ${iteration + 1})...`,
+    });
+
     const response = await client.models.generateContent({
       model,
       contents,
@@ -109,7 +159,9 @@ export async function runAgent(message: string) {
 
     const calls = response.functionCalls ?? [];
     if (calls.length === 0) {
-      return { text: response.text ?? "", activities };
+      const finalText = response.text ?? "";
+      onEvent?.({ type: "done", text: finalText, activities });
+      return { text: finalText, activities };
     }
 
     const modelContent = response.candidates?.[0]?.content;
@@ -117,14 +169,41 @@ export async function runAgent(message: string) {
 
     const responseParts: any[] = [];
     for (const call of calls) {
+      const toolName = call.name ?? "unknown";
+      const toolArgs = call.args ?? {};
+      const activityId = `act_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+      const description = formatToolDescription(toolName, toolArgs);
+
+      const activity: ActivityItem = {
+        id: activityId,
+        tool: toolName,
+        args: toolArgs,
+        status: "running",
+        description,
+        startTime: Date.now(),
+      };
+
+      activities.push(activity);
+      onEvent?.({ type: "tool_start", activity: { ...activity } });
+
       let result: unknown;
+      let isError = false;
+
       try {
-        result = await executeTool(call.name ?? "", call.args ?? {});
+        result = await executeTool(toolName, toolArgs);
+        activity.status = "success";
+        activity.result = result;
       } catch (error) {
-        result = { error: error instanceof Error ? error.message : String(error) };
+        isError = true;
+        const errObj = { error: error instanceof Error ? error.message : String(error) };
+        result = errObj;
+        activity.status = "error";
+        activity.result = errObj;
+      } finally {
+        activity.endTime = Date.now();
+        onEvent?.({ type: "tool_end", activity: { ...activity } });
       }
 
-      activities.push({ tool: call.name ?? "unknown", result });
       responseParts.push({
         functionResponse: {
           id: call.id,
@@ -137,5 +216,7 @@ export async function runAgent(message: string) {
     contents.push({ role: "user", parts: responseParts });
   }
 
-  throw new Error("Agent exceeded the tool-call iteration limit");
+  const errMessage = "O agente excedeu o limite máximo de iterações de ferramentas.";
+  onEvent?.({ type: "error", message: errMessage });
+  throw new Error(errMessage);
 }
