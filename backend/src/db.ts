@@ -45,12 +45,27 @@ interface H2DatabaseSchema {
   };
 }
 
+function findRootDir(): string {
+  let curr = process.cwd();
+  for (let i = 0; i < 5; i++) {
+    if (
+      fs.existsSync(path.join(curr, "package.json")) &&
+      (fs.existsSync(path.join(curr, "supervisor")) ||
+        fs.existsSync(path.join(curr, "backend")) ||
+        fs.existsSync(path.join(curr, "frontend")))
+    ) {
+      return curr;
+    }
+    const parent = path.dirname(curr);
+    if (parent === curr) break;
+    curr = parent;
+  }
+  return process.cwd().endsWith("backend") ? path.resolve(process.cwd(), "..") : process.cwd();
+}
+
 function getDbFilePath(): string {
   if (process.env.H2_DB_PATH) return process.env.H2_DB_PATH;
-  const rootDir = process.cwd().endsWith("backend")
-    ? path.resolve(process.cwd(), "..")
-    : process.cwd();
-  return path.resolve(rootDir, "data", "h2_messages.db");
+  return path.resolve(findRootDir(), "data", "h2_messages.db");
 }
 
 let inMemoryDb: H2DatabaseSchema = {
@@ -105,6 +120,12 @@ function flushToFile() {
     fs.renameSync(tempFile, dbFile);
   } catch (error) {
     console.error("[H2 Database] Error flushing database to file:", error);
+    try {
+      const dbFile = getDbFilePath();
+      fs.writeFileSync(dbFile, JSON.stringify(inMemoryDb, null, 2), "utf-8");
+    } catch (fallbackErr) {
+      console.error("[H2 Database] Direct write fallback failed:", fallbackErr);
+    }
   }
 }
 
@@ -149,6 +170,36 @@ export function saveMessage(msg: H2Message): H2Message {
 
   flushToFile();
   return normalized;
+}
+
+export function updateMessagePartial(id: string, partial: Partial<H2Message>): H2Message {
+  loadDbFromFile();
+  const existingIdx = inMemoryDb.tables.MESSAGES.findIndex((m) => m.id === id);
+  if (existingIdx >= 0) {
+    const existing = inMemoryDb.tables.MESSAGES[existingIdx];
+    const updated: H2Message = {
+      ...existing,
+      ...partial,
+      createdAt: existing.createdAt || Date.now(),
+      isLive: false,
+    };
+    inMemoryDb.tables.MESSAGES[existingIdx] = updated;
+    flushToFile();
+    return updated;
+  } else {
+    const newMsg: H2Message = {
+      id,
+      role: partial.role || "assistant",
+      text: partial.text || "",
+      activities: partial.activities || [],
+      attachments: partial.attachments,
+      createdAt: partial.createdAt || Date.now(),
+      isLive: false,
+    };
+    inMemoryDb.tables.MESSAGES.push(newMsg);
+    flushToFile();
+    return newMsg;
+  }
 }
 
 export function saveAllMessages(messages: H2Message[]): void {
