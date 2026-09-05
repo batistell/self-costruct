@@ -38,7 +38,8 @@ export default function App() {
       }
 
       if (!response.ok) {
-        throw new Error(body.error ?? raw || `Agent request failed with HTTP ${response.status}`);
+        const detail = body.error ?? (raw || `Agent request failed with HTTP ${response.status}`);
+        throw new Error(detail);
       }
 
       if (!raw.trim()) {
