@@ -11,6 +11,7 @@ export default function App() {
   const [activities, setActivities] = useState<Activity[]>([]);
   const [busy, setBusy] = useState(false);
   const [previewKey, setPreviewKey] = useState(0);
+  const [isChatCollapsed, setIsChatCollapsed] = useState(false);
 
   async function submit(event: FormEvent) {
     event.preventDefault();
@@ -59,21 +60,76 @@ export default function App() {
   }
 
   return (
-    <main className="shell">
+    <main className={`shell ${isChatCollapsed ? "collapsed" : ""}`}>
       <section className="agentPane">
-        <header><div><strong>SELF CONSTRUCT</strong><span>Ambiente orientado a Git</span></div><span className="status">● online</span></header>
+        <header>
+          <div>
+            <strong>SELF CONSTRUCT</strong>
+            <span>Ambiente orientado a Git</span>
+          </div>
+          <div className="headerActions">
+            <span className="status">● online</span>
+            <button
+              type="button"
+              className="toggleBtn"
+              onClick={() => setIsChatCollapsed(true)}
+              title="Recolher menu do chat"
+              aria-label="Recolher menu do chat"
+            >
+              ◀ Recolher
+            </button>
+          </div>
+        </header>
         <div className="messages">
-          {messages.map((message, index) => <article key={index} className={message.role}><b>{message.role === "user" ? "Você" : "Agente"}</b><p>{message.text}</p></article>)}
-          {busy && <article className="assistant"><b>Agente</b><p>Trabalhando no GitHub…</p></article>}
+          {messages.map((message, index) => (
+            <article key={index} className={message.role}>
+              <b>{message.role === "user" ? "Você" : "Agente"}</b>
+              <p>{message.text}</p>
+            </article>
+          ))}
+          {busy && (
+            <article className="assistant">
+              <b>Agente</b>
+              <p>Trabalhando no GitHub…</p>
+            </article>
+          )}
         </div>
-        {activities.length > 0 && <details className="activity"><summary>Última execução · {activities.length} chamada{activities.length === 1 ? "" : "s"} de ferramenta</summary><pre>{JSON.stringify(activities, null, 2)}</pre></details>}
+        {activities.length > 0 && (
+          <details className="activity">
+            <summary>
+              Última execução · {activities.length} chamada{activities.length === 1 ? "" : "s"} de ferramenta
+            </summary>
+            <pre>{JSON.stringify(activities, null, 2)}</pre>
+          </details>
+        )}
         <form onSubmit={submit}>
-          <textarea value={input} onChange={(event) => setInput(event.target.value)} placeholder="Descreva o que deve ser alterado…" rows={3} />
+          <textarea
+            value={input}
+            onChange={(event) => setInput(event.target.value)}
+            placeholder="Descreva o que deve ser alterado…"
+            rows={3}
+          />
           <button disabled={busy}>{busy ? "Executando…" : "Enviar"}</button>
         </form>
       </section>
       <section className="previewPane">
-        <header><strong>Pré-visualização ao vivo</strong><button onClick={() => setPreviewKey((value) => value + 1)}>Recarregar</button></header>
+        <header>
+          <div className="previewHeaderLeft">
+            {isChatCollapsed && (
+              <button
+                type="button"
+                className="toggleBtn expandChatBtn"
+                onClick={() => setIsChatCollapsed(false)}
+                title="Expandir menu do chat"
+                aria-label="Expandir menu do chat"
+              >
+                💬 Abrir Chat
+              </button>
+            )}
+            <strong>Pré-visualização ao vivo</strong>
+          </div>
+          <button onClick={() => setPreviewKey((value) => value + 1)}>Recarregar</button>
+        </header>
         <iframe key={previewKey} src="http://127.0.0.1:5174" title="Pré-visualização do Self Construct" />
       </section>
     </main>
