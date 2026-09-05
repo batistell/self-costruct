@@ -1,14 +1,14 @@
 {
   "version": "1.3.5",
-  "commitMessage": "v1.3.5: Chat como aba lateral no celular e refinamento visual da interface",
-  "sha": "a7b3c29",
-  "date": "2025-05-10T16:00:00Z",
+  "commitMessage": "v1.3.5: Fechar dialogs com Backspace/Escape, ocultar recarregar no mobile e melhorias visuais",
+  "sha": "c3f8e91",
+  "date": "2025-05-10T16:30:00Z",
   "author": "Self Construct Agent",
   "environment": "Produção / Ao vivo",
   "changelog": [
     {
       "version": "v1.3.5",
-      "message": "Chat como aba lateral no celular e refinamento visual da interface",
+      "message": "Fechar dialogs e modais com Backspace e Escape, proteger fechamento de tela e ocultar recarregar no mobile",
       "date": "Hoje"
     },
     {
@@ -18,12 +18,12 @@
     },
     {
       "version": "v1.3.3",
-      "message": "Corrigir carregamento do preview e responsividade para acesso mobile em rede local",
+      "message": "Corrigir carregamento dinâmico do preview para celular e tablets via IP local",
       "date": "Hoje"
     },
     {
       "version": "v1.3.2",
-      "message": "Otimização responsiva completa para celular com gaveta lateral, navegação inferior e suporte a toque",
+      "message": "Otimização responsiva completa para celular com gaveta lateral e navegação inferior",
       "date": "Hoje"
     },
     {
