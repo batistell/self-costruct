@@ -10,13 +10,17 @@ if (!process.env.GEMINI_API_KEY) {
 const app = express();
 const port = Number(process.env.PORT ?? 3001);
 
-app.use(express.json({ limit: "10mb" }));
+app.use(express.json({ limit: "50mb" }));
 
 app.get("/health", (_req, res) => res.json({ ok: true }));
 
 app.post("/api/chat", async (req, res) => {
   const message = String(req.body?.message ?? "").trim();
-  if (!message) return res.status(400).json({ error: "message is required" });
+  const files = Array.isArray(req.body?.files) ? req.body.files : [];
+
+  if (!message && files.length === 0) {
+    return res.status(400).json({ error: "message or files are required" });
+  }
 
   const wantsStream =
     req.headers.accept?.includes("text/event-stream") ||
@@ -34,7 +38,7 @@ app.post("/api/chat", async (req, res) => {
     };
 
     try {
-      await runAgent(message, (evt) => sendEvent(evt));
+      await runAgent({ message, files }, (evt) => sendEvent(evt));
       res.end();
     } catch (error) {
       console.error("[backend/stream]", error);
@@ -48,7 +52,7 @@ app.post("/api/chat", async (req, res) => {
   }
 
   try {
-    const result = await runAgent(message);
+    const result = await runAgent({ message, files });
     res.json(result);
   } catch (error) {
     console.error("[backend]", error);
