@@ -202,6 +202,17 @@ export function updateMessagePartial(id: string, partial: Partial<H2Message>): H
   }
 }
 
+export function deleteMessage(id: string): boolean {
+  loadDbFromFile();
+  const beforeLen = inMemoryDb.tables.MESSAGES.length;
+  inMemoryDb.tables.MESSAGES = inMemoryDb.tables.MESSAGES.filter((m) => m.id !== id);
+  const deleted = inMemoryDb.tables.MESSAGES.length < beforeLen;
+  if (deleted) {
+    flushToFile();
+  }
+  return deleted;
+}
+
 export function saveAllMessages(messages: H2Message[]): void {
   loadDbFromFile();
   inMemoryDb.tables.MESSAGES = messages.map((m) => ({
