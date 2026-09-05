@@ -40,12 +40,13 @@ export type H2DbInfo = {
 };
 
 const CURRENT_PLATFORM_VERSION = {
-  version: "1.3.5",
-  commitMessage: "v1.3.5: Fechar dialogs com Backspace/Escape, ocultar recarregar no mobile e melhorias visuais",
-  sha: "c3f8e91",
+  version: "1.3.6",
+  commitMessage: "v1.3.6: Remover barra superior e botão nova aba, adicionar navegação completa com Back e Forward no histórico",
+  sha: "a84f92d",
   author: "Self Construct Agent",
   environment: "Produção / Ao vivo",
   changelog: [
+    { version: "v1.3.6", message: "Remover barra superior e botão de nova aba; suporte completo a histórico e botões Voltar (Back) e Avançar (Forward)", date: "Hoje" },
     { version: "v1.3.5", message: "Fechar dialogs e modais com Backspace e Escape, proteger fechamento de tela e ocultar recarregar no mobile", date: "Hoje" },
     { version: "v1.3.4", message: "Chat como aba lateral deslizante (drawer) no celular e tablets", date: "Hoje" },
     { version: "v1.3.3", message: "Corrigir URL dinâmica do preview para acesso no celular e tablets via IP de rede", date: "Hoje" },
@@ -961,56 +962,19 @@ export default function App() {
         </section>
 
         <section className="previewPane">
-          <header>
-            <div className="previewHeaderLeft">
-              {/* Desktop open chat button */}
-              {isChatCollapsed && (
-                <button
-                  type="button"
-                  className="toggleBtn expandChatBtn desktopOnlyBtn"
-                  onClick={() => setIsChatCollapsed(false)}
-                  title="Expandir menu do chat"
-                  aria-label="Expandir menu do chat"
-                >
-                  💬 Abrir Chat
-                </button>
-              )}
+          {/* Floating trigger on desktop when chat is collapsed */}
+          {isChatCollapsed && (
+            <button
+              type="button"
+              className="floatingDesktopChatTrigger"
+              onClick={() => setIsChatCollapsed(false)}
+              title="Expandir menu do chat"
+              aria-label="Expandir menu do chat"
+            >
+              💬 Abrir Chat
+            </button>
+          )}
 
-              {/* Mobile side drawer trigger button */}
-              <button
-                type="button"
-                className="toggleBtn mobileChatDrawerBtn"
-                onClick={() => setIsMobileChatOpen(true)}
-                title="Abrir aba lateral do chat"
-                aria-label="Abrir aba lateral do chat"
-              >
-                💬 Chat {busy ? "(...)" : ""}
-              </button>
-
-              <strong>Pré-visualização ao vivo</strong>
-            </div>
-
-            <div className="previewHeaderActions">
-              <a
-                href={previewUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="toggleBtn openTabBtn"
-                title="Abrir site diretamente em tela cheia / nova aba"
-              >
-                ↗ Nova Aba
-              </a>
-              {/* Recarregar button only displayed on desktop to avoid cluttering mobile */}
-              <button
-                type="button"
-                className="desktopReloadBtn"
-                onClick={() => setPreviewKey((value) => value + 1)}
-                title="Recarregar tela"
-              >
-                Recarregar
-              </button>
-            </div>
-          </header>
           <iframe key={previewKey} src={previewUrl} title="Pré-visualização do Self Construct" />
         </section>
       </main>
