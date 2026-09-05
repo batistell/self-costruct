@@ -1,9 +1,12 @@
 import express from "express";
 import { execFile, spawn, type ChildProcess } from "node:child_process";
+import { fileURLToPath } from "node:url";
+import path from "node:path";
 import { promisify } from "node:util";
 
 const execFileAsync = promisify(execFile);
-const ROOT = process.cwd();
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const ROOT = path.resolve(__dirname, "../..");
 const PORT = Number(process.env.SUPERVISOR_PORT ?? 3002);
 const children = new Map<string, ChildProcess>();
 let deploying = false;
@@ -65,9 +68,7 @@ async function healthCheck() {
 
 async function dependenciesChanged(from: string, to: string) {
   const changed = await git("diff", "--name-only", from, to);
-  return changed.split("\n").some((file) =>
-    /(^|\/)(package(-lock)?\.json)$/.test(file),
-  );
+  return changed.split("\n").some((file) => /(^|\/)(package(-lock)?\.json)$/.test(file));
 }
 
 async function supervisorChanged(from: string, to: string) {
