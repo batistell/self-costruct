@@ -58,7 +58,7 @@ function App() {
         {nav.slice(6).map(([id, icon, label]) => <button key={id} className={section === id ? "active" : ""} onClick={() => setSection(id)}><i>{icon}</i>{label}</button>)}
       </nav>
       <div className="stageBox"><span>ETAPA ATUAL</span><b>Clareza</b><ProgressBar value={42}/><small>42% concluído</small></div>
-      <div className="user"><span>AB</span><div><b>André Batista</b><small>Dentista</small></div></div>
+      <div className="user"><span>M</span><div><b>Matheus Silva</b><small>Dentista</small></div></div>
     </aside>
 
     <main className="main">
@@ -79,7 +79,7 @@ function App() {
 
 function Dashboard({ setSection, tasks, toggle, completed }: { setSection:(s:Section)=>void; tasks:Task[]; toggle:(id:number)=>void; completed:number }) {
   return <>
-    <section className="welcome"><div><span className="eyebrow gold">SÁBADO, 5 DE SETEMBRO</span><h1>Bom dia, André.</h1><p>Você não precisa ter todas as respostas hoje. Precisa apenas continuar avançando.</p></div><div className="streak"><span>✦</span><b>7 dias</b><small>de evolução contínua</small></div></section>
+    <section className="welcome"><div><span className="eyebrow gold">SÁBADO, 5 DE SETEMBRO</span><h1>Bom dia, Matheus.</h1><p>Você não precisa ter todas as respostas hoje. Precisa apenas continuar avançando.</p></div><div className="streak"><span>✦</span><b>7 dias</b><small>de evolução contínua</small></div></section>
 
     <section className="card journeyCard">
       <div className="sectionHead"><div><span className="eyebrow">MÉTODO DENTISTA DE PROPÓSITO</span><h2>Sua jornada</h2></div><button className="link" onClick={() => setSection("journey")}>Ver jornada completa →</button></div>
@@ -113,6 +113,6 @@ function Content() { const courses=["Gestão para Clínicas","Posicionamento Pro
 
 function Progress({ completed }: { completed:number }) { return <><PageTitle eyebrow="EVOLUÇÃO" title="Seu progresso" text="Acompanhe evidências reais de evolução ao longo da sua jornada."/><div className="grid progressGrid"><div className="card statHero"><b>31%</b><span>Jornada inicial concluída</span><ProgressBar value={31}/></div><div className="card statHero"><b>64</b><span>Pontuação atual do diagnóstico</span><ProgressBar value={64}/></div><div className="card statHero"><b>{completed}</b><span>Ações concluídas</span></div><div className="card statHero"><b>5</b><span>Aulas concluídas</span></div></div><div className="card timeline"><span className="eyebrow">HISTÓRICO RECENTE</span><h2>Seus avanços</h2>{["Concluiu a aula 'Quem sou eu, onde estou e para onde quero ir?'","Finalizou o diagnóstico profissional inicial","Definiu o objetivo 'Abrir minha própria clínica'","Iniciou a etapa Clareza"].map((x,i)=><div key={x}><span>✓</span><p>{x}<small>{i===0?"Hoje":i===1?"2 dias atrás":i===2?"4 dias atrás":"7 dias atrás"}</small></p></div>)}</div></>; }
 
-function Profile() { return <><PageTitle eyebrow="SEU PERFIL" title="Perfil profissional" text="As informações que ajudam a plataforma a entender seu momento e personalizar sua jornada."/><div className="card profileCard"><div className="profileTop"><span className="profileAvatar">AB</span><div><h2>André Batista</h2><p>Dentista · São Paulo, SP</p></div><button className="secondary">Editar perfil</button></div><div className="profileGrid"><label>Momento profissional<strong>Dentista em fase de crescimento</strong></label><label>Tempo de formado<strong>5 anos</strong></label><label>Especialidade<strong>Clínica Geral</strong></label><label>Objetivo principal<strong>Abrir clínica própria</strong></label><label>Principal dificuldade<strong>Posicionamento e gestão</strong></label><label>Etapa atual<strong>Clareza</strong></label></div></div></>; }
+function Profile() { return <><PageTitle eyebrow="SEU PERFIL" title="Perfil profissional" text="As informações que ajudam a plataforma a entender seu momento e personalizar sua jornada."/><div className="card profileCard"><div className="profileTop"><span className="profileAvatar">M</span><div><h2>Matheus Silva</h2><p>Dentista · São Paulo, SP</p></div><button className="secondary">Editar perfil</button></div><div className="profileGrid"><label>Momento profissional<strong>Dentista em fase de crescimento</strong></label><label>Tempo de formado<strong>5 anos</strong></label><label>Especialidade<strong>Clínica Geral</strong></label><label>Objetivo principal<strong>Abrir clínica própria</strong></label><label>Principal dificuldade<strong>Posicionamento e gestão</strong></label><label>Etapa atual<strong>Clareza</strong></label></div></div></>; }
 
 ReactDOM.createRoot(document.getElementById("root")!).render(<React.StrictMode><App/></React.StrictMode>);
