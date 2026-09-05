@@ -3,7 +3,18 @@ import ReactDOM from "react-dom/client";
 import versionData from "./version.json";
 import "./styles.css";
 
-type Section = "dashboard" | "journey" | "diagnostic" | "clientsDiagnostic" | "goals" | "plan" | "content" | "progress" | "profile";
+type Section =
+  | "dashboard"
+  | "journey"
+  | "diagnostic"
+  | "clientsDiagnostic"
+  | "hotmart"
+  | "goals"
+  | "plan"
+  | "content"
+  | "progress"
+  | "profile";
+
 type Task = { id: number; title: string; category: string; due: string; done: boolean };
 
 const VALID_SECTIONS: Section[] = [
@@ -11,11 +22,12 @@ const VALID_SECTIONS: Section[] = [
   "journey",
   "diagnostic",
   "clientsDiagnostic",
+  "hotmart",
   "goals",
   "plan",
   "content",
   "progress",
-  "profile"
+  "profile",
 ];
 
 function getInitialSection(): Section {
@@ -51,6 +63,118 @@ type ClientDiagnosticItem = {
     adherence: number;
   };
 };
+
+export type HotmartLesson = {
+  id: string;
+  title: string;
+  moduleTitle: string;
+  moduleIndex: number;
+  lessonIndex: number;
+  duration: string;
+  description: string;
+  videoUrl: string; // Direct stream or embed
+  thumbnailText: string;
+  completed: boolean;
+  notes?: string;
+  attachments?: { name: string; size: string; type: string }[];
+};
+
+const initialHotmartLessons: HotmartLesson[] = [
+  {
+    id: "hotmart-101",
+    title: "Aula 1.1: Diagnóstico Integrado e Avaliação de Comorbidades (CID-10)",
+    moduleTitle: "Módulo 1: Fundamentos Clínicos & Diagnóstico de Alta Precisão",
+    moduleIndex: 1,
+    lessonIndex: 1,
+    duration: "18:42",
+    description:
+      "Aprenda a correlacionar comorbidades sistêmicas (Hipertensão I10, Diabetes E11.9, Bruxismo G47.63) com o plano de tratamento odontológico para aumentar a segurança clínica e o valor percebido pelo paciente.",
+    videoUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
+    thumbnailText: "DIAGNÓSTICO CID-10",
+    completed: true,
+    attachments: [
+      { name: "Guia_Pratico_Comorbidades_CID10_Odonto.pdf", size: "2.4 MB", type: "PDF" },
+      { name: "Checklist_Anamnese_Estrategica.pdf", size: "1.1 MB", type: "PDF" }
+    ]
+  },
+  {
+    id: "hotmart-102",
+    title: "Aula 1.2: Precificação Consciente e Apresentação de Planos de Tratamento",
+    moduleTitle: "Módulo 1: Fundamentos Clínicos & Diagnóstico de Alta Precisão",
+    moduleIndex: 1,
+    lessonIndex: 2,
+    duration: "24:15",
+    description:
+      "Como sair da guerra de preços e apresentar o planejamento clínico demonstrando investimento em saúde e longevidade do sorriso com alta taxa de fechamento.",
+    videoUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4",
+    thumbnailText: "PLANOS DE TRATAMENTO",
+    completed: true,
+    attachments: [
+      { name: "Planilha_Calculo_Hora_Clinica_DP.xlsx", size: "850 KB", type: "XLSX" }
+    ]
+  },
+  {
+    id: "hotmart-201",
+    title: "Aula 2.1: Gestão de Fluxo de Atendimento e Experiência do Paciente",
+    moduleTitle: "Módulo 2: Gestão de Consultório & Experiência de Alto Nível",
+    moduleIndex: 2,
+    lessonIndex: 1,
+    duration: "29:50",
+    description:
+      "Construção da jornada do paciente desde o primeiro contato no WhatsApp até o pós-consulta, reduzindo faltas e cancelamentos para menos de 5%.",
+    videoUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",
+    thumbnailText: "EXPERIÊNCIA DO PACIENTE",
+    completed: false,
+    attachments: [
+      { name: "Scripts_Atendimento_Recepcao.pdf", size: "1.8 MB", type: "PDF" }
+    ]
+  },
+  {
+    id: "hotmart-202",
+    title: "Aula 2.2: Retenção e Protocolos de Check-up Preventivo Semestral",
+    moduleTitle: "Módulo 2: Gestão de Consultório & Experiência de Alto Nível",
+    moduleIndex: 2,
+    lessonIndex: 2,
+    duration: "21:30",
+    description:
+      "Como estruturar um programa de prevenção contínua que gera receita previsível e mantém a saúde bucal da sua carteira em níveis de excelência.",
+    videoUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4",
+    thumbnailText: "RETENÇÃO PREVENTIVA",
+    completed: false,
+    attachments: [
+      { name: "Modelo_Contrato_Manutencao_Preventiva.docx", size: "320 KB", type: "DOCX" }
+    ]
+  },
+  {
+    id: "hotmart-301",
+    title: "Aula 3.1: Posicionamento Digital & Atração de Pacientes Ideais",
+    moduleTitle: "Módulo 3: Posicionamento, Autoridade & Crescimento",
+    moduleIndex: 3,
+    lessonIndex: 1,
+    duration: "34:10",
+    description:
+      "Estratégias éticas de marketing odontológico para gerar autoridade no Instagram, Google e indicações qualificadas sem depender de dancinhas.",
+    videoUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4",
+    thumbnailText: "POSICIONAMENTO DIGITAL",
+    completed: false,
+    attachments: [
+      { name: "Manual_Linha_Editorial_Odonto.pdf", size: "3.2 MB", type: "PDF" }
+    ]
+  },
+  {
+    id: "hotmart-302",
+    title: "Aula 3.2: Fechamento de Casos Reabilitadores e Ortodônticos",
+    moduleTitle: "Módulo 3: Posicionamento, Autoridade & Crescimento",
+    moduleIndex: 3,
+    lessonIndex: 2,
+    duration: "27:45",
+    description:
+      "Técnicas de comunicação assertiva para casos complexos: do diagnóstico visual em fotos ao fechamento com clareza e transparência.",
+    videoUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyBlazes.mp4",
+    thumbnailText: "FECHAMENTO DE CASOS",
+    completed: false,
+  }
+];
 
 const initialClients: ClientDiagnosticItem[] = [
   {
@@ -173,9 +297,9 @@ const diagnostic = [
 ] as const;
 
 const defaultTasks: Task[] = [
-  { id: 1, title: "Definir objetivo profissional para os próximos 24 meses", category: "Clareza", due: "Hoje", done: false },
-  { id: 2, title: "Levantar custos fixos e variáveis da clínica", category: "Financeiro", due: "Amanhã", done: false },
-  { id: 3, title: "Assistir aula: Quem sou eu, onde estou e para onde vou?", category: "Curso", due: "Esta semana", done: true },
+  { id: 1, title: "Assistir Aula 1.1 do Hotmart: Diagnóstico Integrado e CID-10", category: "Hotmart", due: "Hoje", done: true },
+  { id: 2, title: "Definir objetivo profissional para os próximos 24 meses", category: "Clareza", due: "Hoje", done: false },
+  { id: 3, title: "Levantar custos fixos e variáveis da clínica com a planilha Hotmart", category: "Financeiro", due: "Amanhã", done: false },
   { id: 4, title: "Revisar posicionamento atual nas redes sociais", category: "Posicionamento", due: "Esta semana", done: false },
 ];
 
@@ -250,6 +374,591 @@ function VersionModal({ isOpen, onClose }: { isOpen: boolean; onClose: () => voi
 
         <div className="versionModalFooter">
           <button className="primary" onClick={onClose}>Fechar Detalhes</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* =========================================================================
+   HOTMART INTEGRATION SECTION & VIDEO PLAYER COMPONENT
+   ========================================================================= */
+function HotmartSection({
+  lessons,
+  setLessons,
+  onOpenAddModal,
+  onOpenSettingsModal,
+}: {
+  lessons: HotmartLesson[];
+  setLessons: React.Dispatch<React.SetStateAction<HotmartLesson[]>>;
+  onOpenAddModal: () => void;
+  onOpenSettingsModal: () => void;
+}) {
+  const [selectedLessonId, setSelectedLessonId] = useState<string>(() => lessons[0]?.id || "");
+  const [playbackSpeed, setPlaybackSpeed] = useState<number>(1);
+  const [userNote, setUserNote] = useState<string>("");
+  const [activeTab, setActiveTab] = useState<"overview" | "notes" | "materials">("overview");
+  const [searchFilter, setSearchFilter] = useState<string>("");
+
+  const currentLesson = useMemo(() => {
+    return lessons.find((l) => l.id === selectedLessonId) || lessons[0];
+  }, [lessons, selectedLessonId]);
+
+  useEffect(() => {
+    if (currentLesson) {
+      setUserNote(currentLesson.notes || "");
+    }
+  }, [currentLesson]);
+
+  const toggleLessonComplete = (lessonId: string) => {
+    setLessons((prev) =>
+      prev.map((l) => (l.id === lessonId ? { ...l, completed: !l.completed } : l))
+    );
+  };
+
+  const saveNotes = () => {
+    setLessons((prev) =>
+      prev.map((l) => (l.id === selectedLessonId ? { ...l, notes: userNote } : l))
+    );
+    alert("Anotações da aula salvas com sucesso!");
+  };
+
+  const completedCount = useMemo(() => lessons.filter((l) => l.completed).length, [lessons]);
+  const progressPercent = useMemo(
+    () => (lessons.length > 0 ? Math.round((completedCount / lessons.length) * 100) : 0),
+    [completedCount, lessons.length]
+  );
+
+  const filteredLessons = useMemo(() => {
+    if (!searchFilter.trim()) return lessons;
+    const q = searchFilter.toLowerCase();
+    return lessons.filter(
+      (l) =>
+        l.title.toLowerCase().includes(q) ||
+        l.moduleTitle.toLowerCase().includes(q) ||
+        l.description.toLowerCase().includes(q)
+    );
+  }, [lessons, searchFilter]);
+
+  // Group lessons by module
+  const modules = useMemo(() => {
+    const map = new Map<string, HotmartLesson[]>();
+    filteredLessons.forEach((l) => {
+      const arr = map.get(l.moduleTitle) || [];
+      arr.push(l);
+      map.set(l.moduleTitle, arr);
+    });
+    return Array.from(map.entries()).map(([moduleTitle, items]) => ({
+      moduleTitle,
+      items,
+    }));
+  }, [filteredLessons]);
+
+  const handleNextLesson = () => {
+    const currentIndex = lessons.findIndex((l) => l.id === currentLesson?.id);
+    if (currentIndex >= 0 && currentIndex < lessons.length - 1) {
+      setSelectedLessonId(lessons[currentIndex + 1].id);
+    }
+  };
+
+  const handlePrevLesson = () => {
+    const currentIndex = lessons.findIndex((l) => l.id === currentLesson?.id);
+    if (currentIndex > 0) {
+      setSelectedLessonId(lessons[currentIndex - 1].id);
+    }
+  };
+
+  return (
+    <div className="hotmartPage">
+      {/* Header Banner & Hotmart Status */}
+      <div className="hotmartHeaderBanner card">
+        <div className="hotmartHeaderLeft">
+          <div className="hotmartBadgeGroup">
+            <span className="hotmartFireBadge">🔥 HOTMART CLUB INTEGRADO</span>
+            <span className="hotmartSyncPill">● Sincronizado</span>
+          </div>
+          <h2>Vídeos & Aulas do Hotmart Club</h2>
+          <p>
+            Assista aos módulos completos do treinamento <strong>Dentista de Propósito</strong> diretamente no site, com sincronização de progresso e materiais de apoio.
+          </p>
+        </div>
+
+        <div className="hotmartHeaderRight">
+          <div className="hotmartProgressCard">
+            <div className="hotmartProgressHead">
+              <span>Seu Progresso Hotmart</span>
+              <b>{progressPercent}%</b>
+            </div>
+            <ProgressBar value={progressPercent} />
+            <small>{completedCount} de {lessons.length} aulas concluídas</small>
+          </div>
+
+          <div className="hotmartActionBtns">
+            <button className="secondary" onClick={onOpenSettingsModal} title="Configurações e Token Hotmart">
+              ⚙️ Conexão Hotmart
+            </button>
+            <button className="primary" onClick={onOpenAddModal}>
+              + Adicionar Link Hotmart
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Main Video Theater Layout */}
+      <div className="hotmartTheaterGrid">
+        {/* Left / Main Player Area */}
+        <div className="hotmartPlayerCol">
+          <div className="card hotmartPlayerCard">
+            {/* HTML5 / Embed Responsive Video Container */}
+            <div className="videoWrapper">
+              {currentLesson ? (
+                currentLesson.videoUrl.includes("youtube.com") ||
+                currentLesson.videoUrl.includes("vimeo.com") ||
+                currentLesson.videoUrl.includes("hotmart.com/embed") ? (
+                  <iframe
+                    src={currentLesson.videoUrl}
+                    title={currentLesson.title}
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                    className="videoFrame"
+                  />
+                ) : (
+                  <video
+                    key={currentLesson.videoUrl}
+                    controls
+                    autoPlay={false}
+                    className="videoElement"
+                    playbackRate={playbackSpeed}
+                    poster="https://images.unsplash.com/photo-1629909613654-28e377c37b09?auto=format&fit=crop&w=1200&q=80"
+                  >
+                    <source src={currentLesson.videoUrl} type="video/mp4" />
+                    Seu navegador não suporta a reprodução de vídeo direto.
+                  </video>
+                )
+              ) : (
+                <div className="noVideoPlaceholder">Nenhum vídeo selecionado</div>
+              )}
+            </div>
+
+            {/* Video Controls and Meta */}
+            <div className="videoMetaBar">
+              <div className="videoTitleRow">
+                <div>
+                  <span className="moduleTag">{currentLesson?.moduleTitle}</span>
+                  <h3 className="videoLessonTitle">{currentLesson?.title}</h3>
+                </div>
+                <div className="videoActionButtons">
+                  <button
+                    className={`markDoneBtn ${currentLesson?.completed ? "isDone" : ""}`}
+                    onClick={() => currentLesson && toggleLessonComplete(currentLesson.id)}
+                  >
+                    {currentLesson?.completed ? "✓ Concluída no Hotmart" : "Marcar como Concluída"}
+                  </button>
+                </div>
+              </div>
+
+              {/* Navigation between lessons bar */}
+              <div className="videoControlsRow">
+                <div className="lessonNavigationBtns">
+                  <button className="secondary btnSmall" onClick={handlePrevLesson}>
+                    ‹ Aula Anterior
+                  </button>
+                  <button className="primary btnSmall" onClick={handleNextLesson}>
+                    Próxima Aula ›
+                  </button>
+                </div>
+
+                <div className="speedSelector">
+                  <span className="speedLabel">Velocidade:</span>
+                  {[1, 1.25, 1.5, 2].map((s) => (
+                    <button
+                      key={s}
+                      className={`speedBtn ${playbackSpeed === s ? "active" : ""}`}
+                      onClick={() => setPlaybackSpeed(s)}
+                    >
+                      {s}x
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Tabs for Overview, Notes, and Attachments */}
+            <div className="lessonTabHeader">
+              <button
+                className={`lessonTabBtn ${activeTab === "overview" ? "active" : ""}`}
+                onClick={() => setActiveTab("overview")}
+              >
+                📋 Descrição & Resumo
+              </button>
+              <button
+                className={`lessonTabBtn ${activeTab === "materials" ? "active" : ""}`}
+                onClick={() => setActiveTab("materials")}
+              >
+                📎 Materiais de Apoio ({(currentLesson?.attachments || []).length})
+              </button>
+              <button
+                className={`lessonTabBtn ${activeTab === "notes" ? "active" : ""}`}
+                onClick={() => setActiveTab("notes")}
+              >
+                📝 Minhas Anotações
+              </button>
+            </div>
+
+            <div className="lessonTabBody">
+              {activeTab === "overview" && (
+                <div className="overviewTabContent">
+                  <p className="lessonDescText">{currentLesson?.description}</p>
+                  <div className="lessonHighlightsBox">
+                    <strong>💡 Principais Pontos Desta Aula:</strong>
+                    <ul>
+                      <li>Alinhamento da conduta odontológica com os códigos CID-10 informados na anamnese.</li>
+                      <li>Comunicação empática e sem termos técnicos excessivos que aumentam o fechamento.</li>
+                      <li>Rastreabilidade das metas clínicas e planejamento preventivo do paciente.</li>
+                    </ul>
+                  </div>
+                </div>
+              )}
+
+              {activeTab === "materials" && (
+                <div className="materialsTabContent">
+                  {currentLesson?.attachments && currentLesson.attachments.length > 0 ? (
+                    <div className="attachmentsList">
+                      {currentLesson.attachments.map((att, idx) => (
+                        <div key={idx} className="attachmentItemCard">
+                          <div className="attachmentItemIcon">
+                            {att.type === "PDF" ? "📕" : att.type === "XLSX" ? "📊" : "📄"}
+                          </div>
+                          <div className="attachmentItemInfo">
+                            <b>{att.name}</b>
+                            <small>{att.size} · Arquivo do Hotmart Club</small>
+                          </div>
+                          <button
+                            className="secondary btnSmall downloadBtn"
+                            onClick={() => alert(`Iniciando download seguro de: ${att.name}`)}
+                          >
+                            ⬇ Baixar
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="emptyMaterialsText">Esta aula não possui arquivos extras para download.</p>
+                  )}
+                </div>
+              )}
+
+              {activeTab === "notes" && (
+                <div className="notesTabContent">
+                  <p className="notesHelpText">
+                    Escreva aqui suas ideias, insights clínicos e anotações enquanto assiste:
+                  </p>
+                  <textarea
+                    className="notesTextarea"
+                    rows={5}
+                    placeholder="Ex: Aplicar a tabela de comorbidades CID-10 na anamnese de amanhã com o paciente Rodrigo..."
+                    value={userNote}
+                    onChange={(e) => setUserNote(e.target.value)}
+                  />
+                  <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 8 }}>
+                    <button className="primary btnSmall" onClick={saveNotes}>
+                      Salvar Minhas Anotações
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Right / Playlist Sidebar Area */}
+        <div className="hotmartPlaylistCol">
+          <div className="card hotmartPlaylistCard">
+            <div className="playlistHeader">
+              <div className="playlistTitleRow">
+                <h3>Conteúdo do Curso</h3>
+                <span className="lessonCountBadge">{lessons.length} aulas</span>
+              </div>
+              <div className="playlistSearch">
+                <input
+                  type="text"
+                  placeholder="Pesquisar aulas ou temas..."
+                  value={searchFilter}
+                  onChange={(e) => setSearchFilter(e.target.value)}
+                />
+                {searchFilter && (
+                  <button className="clearSearchBtn" onClick={() => setSearchFilter("")}>✕</button>
+                )}
+              </div>
+            </div>
+
+            <div className="playlistModulesList">
+              {modules.map((mod, modIdx) => (
+                <div key={modIdx} className="playlistModuleGroup">
+                  <div className="playlistModuleHead">
+                    <span>{mod.moduleTitle}</span>
+                  </div>
+                  <div className="playlistItems">
+                    {mod.items.map((lesson) => {
+                      const isSelected = lesson.id === currentLesson?.id;
+                      return (
+                        <div
+                          key={lesson.id}
+                          className={`playlistLessonItem ${isSelected ? "selected" : ""} ${lesson.completed ? "completed" : ""}`}
+                          onClick={() => setSelectedLessonId(lesson.id)}
+                        >
+                          <div className="lessonItemCheck" onClick={(e) => {
+                            e.stopPropagation();
+                            toggleLessonComplete(lesson.id);
+                          }}>
+                            {lesson.completed ? "✓" : "○"}
+                          </div>
+                          <div className="lessonItemInfo">
+                            <span className="lessonItemTitle">{lesson.title}</span>
+                            <div className="lessonItemMeta">
+                              <span className="lessonDuration">⏱ {lesson.duration}</span>
+                              {lesson.attachments && lesson.attachments.length > 0 && (
+                                <span className="lessonHasAttachment">📎 {lesson.attachments.length} anexo(s)</span>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* Modal to Add Custom Hotmart Video / URL */
+function AddHotmartVideoModal({
+  isOpen,
+  onClose,
+  onAddLesson,
+}: {
+  isOpen: boolean;
+  onClose: () => void;
+  onAddLesson: (lesson: HotmartLesson) => void;
+}) {
+  const [title, setTitle] = useState("");
+  const [moduleTitle, setModuleTitle] = useState("Módulo 1: Fundamentos Clínicos & Diagnóstico de Alta Precisão");
+  const [videoUrl, setVideoUrl] = useState("");
+  const [duration, setDuration] = useState("20:00");
+  const [description, setDescription] = useState("");
+
+  if (!isOpen) return null;
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!title.trim() || !videoUrl.trim()) return;
+
+    const newLesson: HotmartLesson = {
+      id: `hotmart-${Date.now()}`,
+      title,
+      moduleTitle,
+      moduleIndex: 1,
+      lessonIndex: 99,
+      duration: duration || "15:00",
+      description: description || "Vídeo adicionado via link da plataforma Hotmart.",
+      videoUrl,
+      thumbnailText: "HOTMART",
+      completed: false,
+    };
+
+    onAddLesson(newLesson);
+    onClose();
+    setTitle("");
+    setVideoUrl("");
+    setDescription("");
+  };
+
+  return (
+    <div className="versionModalOverlay" onClick={onClose} role="dialog" aria-modal="true">
+      <div className="versionModalCard" onClick={(e) => e.stopPropagation()}>
+        <div className="versionModalHeader">
+          <div className="versionModalTitleGroup">
+            <span className="hotmartFireBadge">🔥 HOTMART</span>
+            <div>
+              <h3 style={{ margin: 0 }}>Adicionar Vídeo ou Aula do Hotmart</h3>
+              <small>Integre uma nova aula ou vídeo da sua área de membros</small>
+            </div>
+          </div>
+          <button className="versionCloseBtn" onClick={onClose} aria-label="Fechar" title="Pressione Esc para fechar">✕</button>
+        </div>
+
+        <form onSubmit={handleSubmit}>
+          <div className="versionModalBody" style={{ gap: 14 }}>
+            <div>
+              <label style={{ fontSize: 11, fontWeight: 700, color: "#134e4a", display: "block", marginBottom: 5 }}>
+                Título da Aula / Vídeo *
+              </label>
+              <input
+                type="text"
+                required
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                placeholder="Ex: Aula 4.1: Manejo Clínico de Pacientes Hipertensos"
+                style={{ width: "100%", padding: "9px 12px", borderRadius: 8, border: "1px solid #cbe4da", fontSize: 13 }}
+              />
+            </div>
+
+            <div>
+              <label style={{ fontSize: 11, fontWeight: 700, color: "#134e4a", display: "block", marginBottom: 5 }}>
+                Módulo do Curso
+              </label>
+              <select
+                value={moduleTitle}
+                onChange={(e) => setModuleTitle(e.target.value)}
+                style={{ width: "100%", padding: "9px 12px", borderRadius: 8, border: "1px solid #cbe4da", fontSize: 13, background: "#fff" }}
+              >
+                <option value="Módulo 1: Fundamentos Clínicos & Diagnóstico de Alta Precisão">Módulo 1: Fundamentos Clínicos & Diagnóstico de Alta Precisão</option>
+                <option value="Módulo 2: Gestão de Consultório & Experiência de Alto Nível">Módulo 2: Gestão de Consultório & Experiência de Alto Nível</option>
+                <option value="Módulo 3: Posicionamento, Autoridade & Crescimento">Módulo 3: Posicionamento, Autoridade & Crescimento</option>
+                <option value="Módulo 4: Casos Práticos & Protocolos Odontológicos">Módulo 4: Casos Práticos & Protocolos Odontológicos</option>
+              </select>
+            </div>
+
+            <div>
+              <label style={{ fontSize: 11, fontWeight: 700, color: "#134e4a", display: "block", marginBottom: 5 }}>
+                Link do Vídeo ou Embed do Hotmart / Stream *
+              </label>
+              <input
+                type="text"
+                required
+                value={videoUrl}
+                onChange={(e) => setVideoUrl(e.target.value)}
+                placeholder="https://... (Hotmart embed, MP4 stream, Vimeo ou YouTube)"
+                style={{ width: "100%", padding: "9px 12px", borderRadius: 8, border: "1px solid #cbe4da", fontSize: 13 }}
+              />
+              <small style={{ fontSize: 11, color: "#047857", marginTop: 4, display: "block" }}>
+                💡 Você pode colar links diretos do Hotmart Club Player, URLs de streaming ou embeds de vídeo.
+              </small>
+            </div>
+
+            <div className="grid two" style={{ gap: 12 }}>
+              <div>
+                <label style={{ fontSize: 11, fontWeight: 700, color: "#134e4a", display: "block", marginBottom: 5 }}>
+                  Duração Estimada
+                </label>
+                <input
+                  type="text"
+                  value={duration}
+                  onChange={(e) => setDuration(e.target.value)}
+                  placeholder="Ex: 22:30"
+                  style={{ width: "100%", padding: "9px 12px", borderRadius: 8, border: "1px solid #cbe4da", fontSize: 13 }}
+                />
+              </div>
+            </div>
+
+            <div>
+              <label style={{ fontSize: 11, fontWeight: 700, color: "#134e4a", display: "block", marginBottom: 5 }}>
+                Descrição & Objetivos da Aula
+              </label>
+              <textarea
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                placeholder="Resumo dos tópicos ensinados nesta aula..."
+                rows={3}
+                style={{ width: "100%", padding: "9px 12px", borderRadius: 8, border: "1px solid #cbe4da", fontSize: 13 }}
+              />
+            </div>
+          </div>
+
+          <div className="versionModalFooter" style={{ gap: 10 }}>
+            <button type="button" className="secondary" onClick={onClose}>Cancelar</button>
+            <button type="submit" className="primary">Salvar e Assistir</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}
+
+/* Modal for Hotmart Connection Settings */
+function HotmartSettingsModal({
+  isOpen,
+  onClose,
+}: {
+  isOpen: boolean;
+  onClose: () => void;
+}) {
+  const [clubDomain, setClubDomain] = useState("dentistadeproposito.club.hotmart.com");
+  const [hottok, setHottok] = useState("htk_9982348a8f82194c7b640192e");
+  const [autoSync, setAutoSync] = useState(true);
+
+  if (!isOpen) return null;
+
+  return (
+    <div className="versionModalOverlay" onClick={onClose} role="dialog" aria-modal="true">
+      <div className="versionModalCard" onClick={(e) => e.stopPropagation()}>
+        <div className="versionModalHeader">
+          <div className="versionModalTitleGroup">
+            <span className="hotmartFireBadge">⚙️ INTEGRAÇÃO</span>
+            <div>
+              <h3 style={{ margin: 0 }}>Configurações do Hotmart Club</h3>
+              <small>Credenciais de API, Webhooks e Sincronização</small>
+            </div>
+          </div>
+          <button className="versionCloseBtn" onClick={onClose} aria-label="Fechar">✕</button>
+        </div>
+
+        <div className="versionModalBody" style={{ gap: 14 }}>
+          <div style={{ background: "#ecfdf5", border: "1.5px solid #6ee7b7", borderRadius: 10, padding: 12 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <span style={{ fontSize: 16 }}>✅</span>
+              <strong style={{ color: "#065f46", fontSize: 13 }}>Status da Conexão: Ativo & Conectado</strong>
+            </div>
+            <p style={{ margin: "4px 0 0", fontSize: 11.5, color: "#047857" }}>
+              Sua conta do Hotmart Club está autenticada. As aulas e o progresso estão sendo sincronizados automaticamente.
+            </p>
+          </div>
+
+          <div>
+            <label style={{ fontSize: 11, fontWeight: 700, color: "#134e4a", display: "block", marginBottom: 5 }}>
+              Domínio da Área de Membros (Hotmart Club)
+            </label>
+            <input
+              type="text"
+              value={clubDomain}
+              onChange={(e) => setClubDomain(e.target.value)}
+              style={{ width: "100%", padding: "9px 12px", borderRadius: 8, border: "1px solid #cbe4da", fontSize: 13 }}
+            />
+          </div>
+
+          <div>
+            <label style={{ fontSize: 11, fontWeight: 700, color: "#134e4a", display: "block", marginBottom: 5 }}>
+              Token de Autenticação Hotmart (Hottok)
+            </label>
+            <input
+              type="password"
+              value={hottok}
+              onChange={(e) => setHottok(e.target.value)}
+              style={{ width: "100%", padding: "9px 12px", borderRadius: 8, border: "1px solid #cbe4da", fontSize: 13 }}
+            />
+          </div>
+
+          <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 4 }}>
+            <input
+              type="checkbox"
+              id="autoSyncCheck"
+              checked={autoSync}
+              onChange={(e) => setAutoSync(e.target.checked)}
+              style={{ accentColor: "#059669", width: 16, height: 16 }}
+            />
+            <label htmlFor="autoSyncCheck" style={{ fontSize: 12.5, color: "#1f2937", cursor: "pointer" }}>
+              Sincronizar progresso de aulas concluídas em segundo plano
+            </label>
+          </div>
+        </div>
+
+        <div className="versionModalFooter" style={{ gap: 10 }}>
+          <button className="primary" onClick={onClose}>Salvar e Fechar</button>
         </div>
       </div>
     </div>
@@ -485,7 +1194,7 @@ function ClientsDiagnosticSection({
                       <h3>{client.name}</h3>
                       <span className="clientId">{client.id}</span>
                     </div>
-                    <span className="clientAgeInfo">{client.age} anos · Última consulta: {client.lastVisit}</span>
+                    <span className="clientAgeInfo">{client.age} anos ·配合 Última consulta: {client.lastVisit}</span>
                   </div>
                   <span className={`clientCategoryBadge ${badgeClass}`}>{client.category}</span>
                 </div>
@@ -867,12 +1576,37 @@ export default function App() {
   const [showVersionModal, setShowVersionModal] = useState(false);
   const [selectedClient, setSelectedClient] = useState<ClientDiagnosticItem | null>(null);
   const [showNewModal, setShowNewModal] = useState<boolean>(false);
+  const [showAddHotmartModal, setShowAddHotmartModal] = useState<boolean>(false);
+  const [showHotmartSettingsModal, setShowHotmartSettingsModal] = useState<boolean>(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  // Hotmart Lessons State
+  const [hotmartLessons, setHotmartLessons] = useState<HotmartLesson[]>(() => {
+    try {
+      const saved = localStorage.getItem("dp_hotmart_lessons");
+      return saved ? JSON.parse(saved) : initialHotmartLessons;
+    } catch {
+      return initialHotmartLessons;
+    }
+  });
+
+  useEffect(() => {
+    try {
+      localStorage.setItem("dp_hotmart_lessons", JSON.stringify(hotmartLessons));
+    } catch {}
+  }, [hotmartLessons]);
+
   const [tasks, setTasks] = useState<Task[]>(() => {
     try { return JSON.parse(localStorage.getItem("dp_tasks") || "null") || defaultTasks; } catch { return defaultTasks; }
   });
 
-  const isAnyModalOrDrawerOpen = showVersionModal || selectedClient !== null || showNewModal || mobileMenuOpen;
+  const isAnyModalOrDrawerOpen =
+    showVersionModal ||
+    selectedClient !== null ||
+    showNewModal ||
+    showAddHotmartModal ||
+    showHotmartSettingsModal ||
+    mobileMenuOpen;
 
   // Function to navigate between sections with full Browser History (Back & Forward) support
   const navigateTo = (newSection: Section, replace = false) => {
@@ -905,6 +1639,8 @@ export default function App() {
       if (showVersionModal) setShowVersionModal(false);
       if (selectedClient !== null) setSelectedClient(null);
       if (showNewModal) setShowNewModal(false);
+      if (showAddHotmartModal) setShowAddHotmartModal(false);
+      if (showHotmartSettingsModal) setShowHotmartSettingsModal(false);
       if (mobileMenuOpen) setMobileMenuOpen(false);
 
       if (e.state && e.state.section && VALID_SECTIONS.includes(e.state.section)) {
@@ -923,7 +1659,7 @@ export default function App() {
     return () => {
       window.removeEventListener("popstate", handlePopState);
     };
-  }, [showVersionModal, selectedClient, showNewModal, mobileMenuOpen]);
+  }, [showVersionModal, selectedClient, showNewModal, showAddHotmartModal, showHotmartSettingsModal, mobileMenuOpen]);
 
   // Handle Backspace and Escape keyboard events
   useEffect(() => {
@@ -944,6 +1680,8 @@ export default function App() {
           if (showVersionModal) setShowVersionModal(false);
           else if (selectedClient !== null) setSelectedClient(null);
           else if (showNewModal) setShowNewModal(false);
+          else if (showAddHotmartModal) setShowAddHotmartModal(false);
+          else if (showHotmartSettingsModal) setShowHotmartSettingsModal(false);
           else if (mobileMenuOpen) setMobileMenuOpen(false);
         }
       } else if (e.key === "Backspace" && !isTyping) {
@@ -957,13 +1695,23 @@ export default function App() {
     return () => {
       window.removeEventListener("keydown", handleKeyDown, { capture: true });
     };
-  }, [isAnyModalOrDrawerOpen, showVersionModal, selectedClient, showNewModal, mobileMenuOpen]);
+  }, [
+    isAnyModalOrDrawerOpen,
+    showVersionModal,
+    selectedClient,
+    showNewModal,
+    showAddHotmartModal,
+    showHotmartSettingsModal,
+    mobileMenuOpen,
+  ]);
 
   const handleGoBack = () => {
     if (isAnyModalOrDrawerOpen) {
       if (showVersionModal) setShowVersionModal(false);
       if (selectedClient !== null) setSelectedClient(null);
       if (showNewModal) setShowNewModal(false);
+      if (showAddHotmartModal) setShowAddHotmartModal(false);
+      if (showHotmartSettingsModal) setShowHotmartSettingsModal(false);
       if (mobileMenuOpen) setMobileMenuOpen(false);
     } else {
       window.history.back();
@@ -981,8 +1729,9 @@ export default function App() {
     localStorage.setItem("dp_tasks", JSON.stringify(next));
   };
 
-  const nav: [Section, string, string][] = [
+  const nav: [Section, string, string, string?][] = [
     ["dashboard", "⌂", "Início"],
+    ["hotmart", "🔥", "Vídeos Hotmart", "Hotmart"],
     ["journey", "◇", "Minha jornada"],
     ["diagnostic", "◎", "Diagnóstico Pessoal"],
     ["clientsDiagnostic", "👥", "Diagnóstico dos Clientes"],
@@ -1024,19 +1773,20 @@ export default function App() {
         </div>
 
         <nav>
-          <p>SUA JORNADA & CLÍNICA</p>
-          {nav.slice(0, 7).map(([id, icon, label]) => (
+          <p>PLATAFORMA & TREINAMENTO</p>
+          {nav.slice(0, 8).map(([id, icon, label, badge]) => (
             <button
               key={id}
               className={section === id ? "active" : ""}
               onClick={() => navigateTo(id)}
             >
               <i>{icon}</i>{label}
+              {badge && <span className="navHotmartBadge">{badge}</span>}
               {id === "clientsDiagnostic" && <span className="navNewBadge">Novo</span>}
             </button>
           ))}
           <p>VOCÊ</p>
-          {nav.slice(7).map(([id, icon, label]) => (
+          {nav.slice(8).map(([id, icon, label]) => (
             <button
               key={id}
               className={section === id ? "active" : ""}
@@ -1046,6 +1796,17 @@ export default function App() {
             </button>
           ))}
         </nav>
+
+        {/* Hotmart Quick Sync Status Box in Sidebar */}
+        <div className="sidebarHotmartBox" onClick={() => navigateTo("hotmart")}>
+          <div className="hotmartBoxHead">
+            <span className="hotmartFireSmall">🔥</span>
+            <b>HOTMART CLUB</b>
+          </div>
+          <small>6 Aulas Disponíveis</small>
+          <ProgressBar value={Math.round((hotmartLessons.filter((l) => l.completed).length / hotmartLessons.length) * 100)} />
+          <span className="hotmartBoxFoot">Assistir aulas →</span>
+        </div>
 
         <div className="stageBox">
           <span>ETAPA ATUAL</span>
@@ -1121,6 +1882,14 @@ export default function App() {
 
           <div className="headerActionsRow">
             <button
+              className={`headerActionButton ${section === "hotmart" ? "primaryHotmart" : ""}`}
+              onClick={() => navigateTo("hotmart")}
+              title="Acessar Vídeos do Hotmart"
+            >
+              <span className="headerBtnIcon">🔥</span>
+              <span className="headerBtnText">Hotmart</span>
+            </button>
+            <button
               className={`headerActionButton ${section === "clientsDiagnostic" ? "primaryAccent" : ""}`}
               onClick={() => navigateTo("clientsDiagnostic")}
               title="Diagnóstico dos Clientes"
@@ -1146,6 +1915,15 @@ export default function App() {
               tasks={tasks}
               toggle={toggle}
               completed={completed}
+              hotmartLessons={hotmartLessons}
+            />
+          )}
+          {section === "hotmart" && (
+            <HotmartSection
+              lessons={hotmartLessons}
+              setLessons={setHotmartLessons}
+              onOpenAddModal={() => setShowAddHotmartModal(true)}
+              onOpenSettingsModal={() => setShowHotmartSettingsModal(true)}
             />
           )}
           {section === "journey" && <Journey setSection={navigateTo} />}
@@ -1160,7 +1938,7 @@ export default function App() {
           )}
           {section === "goals" && <Goals setSection={navigateTo} />}
           {section === "plan" && <Plan tasks={tasks} toggle={toggle} />}
-          {section === "content" && <Content />}
+          {section === "content" && <Content setSection={navigateTo} />}
           {section === "progress" && <Progress completed={completed} />}
           {section === "profile" && <Profile />}
         </div>
@@ -1173,6 +1951,13 @@ export default function App() {
           >
             <span className="bottomNavIcon">⌂</span>
             <span className="bottomNavLabel">Início</span>
+          </button>
+          <button
+            className={`bottomNavItem ${section === "hotmart" ? "active" : ""}`}
+            onClick={() => navigateTo("hotmart")}
+          >
+            <span className="bottomNavIcon">🔥</span>
+            <span className="bottomNavLabel">Hotmart</span>
           </button>
           <button
             className={`bottomNavItem ${section === "clientsDiagnostic" ? "active" : ""}`}
@@ -1189,13 +1974,6 @@ export default function App() {
             <span className="bottomNavLabel">Plano</span>
           </button>
           <button
-            className={`bottomNavItem ${section === "diagnostic" ? "active" : ""}`}
-            onClick={() => navigateTo("diagnostic")}
-          >
-            <span className="bottomNavIcon">◎</span>
-            <span className="bottomNavLabel">Diagnóstico</span>
-          </button>
-          <button
             className="bottomNavItem"
             onClick={() => setMobileMenuOpen(true)}
           >
@@ -1206,6 +1984,15 @@ export default function App() {
       </main>
 
       <VersionModal isOpen={showVersionModal} onClose={() => setShowVersionModal(false)} />
+      <AddHotmartVideoModal
+        isOpen={showAddHotmartModal}
+        onClose={() => setShowAddHotmartModal(false)}
+        onAddLesson={(newLesson) => setHotmartLessons((prev) => [newLesson, ...prev])}
+      />
+      <HotmartSettingsModal
+        isOpen={showHotmartSettingsModal}
+        onClose={() => setShowHotmartSettingsModal(false)}
+      />
     </div>
   );
 }
@@ -1215,12 +2002,16 @@ function Dashboard({
   tasks,
   toggle,
   completed,
+  hotmartLessons,
 }: {
   setSection: (s: Section) => void;
   tasks: Task[];
   toggle: (id: number) => void;
   completed: number;
+  hotmartLessons: HotmartLesson[];
 }) {
+  const completedHotmart = hotmartLessons.filter((l) => l.completed).length;
+
   return (
     <>
       <section className="welcome">
@@ -1236,10 +2027,31 @@ function Dashboard({
         </div>
       </section>
 
+      {/* Hotmart Video Hub Banner on Dashboard */}
+      <div className="card hotmartDashboardCard">
+        <div className="hotmartDashLeft">
+          <div className="hotmartBadgeGroup">
+            <span className="hotmartFireBadge">🔥 HOTMART CLUB</span>
+            <span className="hotmartSyncPill">● Ao Vivo & Integrado</span>
+          </div>
+          <h3>Assista suas Aulas e Vídeos do Hotmart</h3>
+          <p>Acesse o catálogo de masterclasses, protocolos odontológicos, formulários clínicos e materiais de apoio.</p>
+          <div className="hotmartDashStats">
+            <span>⏱ <strong>{hotmartLessons.length} Aulas</strong> disponíveis</span>
+            <span>✓ <strong>{completedHotmart} Concluídas</strong> ({Math.round((completedHotmart / hotmartLessons.length) * 100)}%)</span>
+          </div>
+        </div>
+        <div className="hotmartDashRight">
+          <button className="primary hotmartPlayBtn" onClick={() => setSection("hotmart")}>
+            ▶ Abrir Player Hotmart
+          </button>
+        </div>
+      </div>
+
       {/* Fast shortcut to Clients Diagnostic */}
       <div className="card clientQuickCallout">
         <div className="quickCalloutLeft">
-          <span className="eyebrow gold">NOVA FERRAMENTA</span>
+          <span className="eyebrow gold">CENTRAL DE PACIENTES</span>
           <h3>Diagnóstico dos Clientes / Pacientes</h3>
           <p>Avalie a saúde bucal, códigos de comorbidades (CID-10) e índice clínico dos seus pacientes em tempo real.</p>
         </div>
@@ -1343,17 +2155,17 @@ function Dashboard({
       <div className="grid two lower">
         <section className="card course">
           <div className="courseArt">
-            <span>GESTÃO</span>
+            <span>HOTMART</span>
             <b>DP</b>
           </div>
           <div>
-            <span className="eyebrow">CONTINUE APRENDENDO</span>
-            <h2>Gestão para Clínicas</h2>
-            <p>Módulo 1 · Quem sou eu, onde estou e para onde quero ir?</p>
-            <ProgressBar value={42} />
-            <small>5 de 12 aulas · 42%</small>
-            <button className="primary" onClick={() => setSection("content")}>
-              Continuar aula →
+            <span className="eyebrow">CONTINUE ASSISTINDO</span>
+            <h2>Gestão para Clínicas & CID-10</h2>
+            <p>Módulo 1 · Aula 1.1: Diagnóstico e Comunicação com Paciente</p>
+            <ProgressBar value={66} />
+            <small>2 de 6 aulas concluídas · 33%</small>
+            <button className="primary" onClick={() => setSection("hotmart")}>
+              Assistir no Player Hotmart →
             </button>
           </div>
         </section>
@@ -1378,7 +2190,7 @@ function Dashboard({
               <span>dias ativos</span>
             </div>
             <div>
-              <b>5</b>
+              <b>{completedHotmart}</b>
               <span>aulas</span>
             </div>
             <div>
@@ -1557,35 +2369,36 @@ function Plan({ tasks, toggle }: { tasks: Task[]; toggle: (id: number) => void }
   );
 }
 
-function Content() {
-  const courses = ["Gestão para Clínicas", "Posicionamento Profissional", "Finanças para Dentistas"];
+function Content({ setSection }: { setSection: (s: Section) => void }) {
+  const courses = [
+    { title: "Gestão para Clínicas", tag: "HOTMART", progress: 66, desc: "Estruture sua clínica para crescer com previsibilidade e controle de custos." },
+    { title: "Diagnóstico Clínico & CID-10", tag: "HOTMART", progress: 50, desc: "Aprofunde na correlação entre riscos sistêmicos e planos odontológicos de sucesso." },
+    { title: "Posicionamento & Vendas Éticas", tag: "CURSO", progress: 20, desc: "Construa uma presença profissional coerente e aumente o valor percebido." }
+  ];
+
   return (
     <>
       <PageTitle
         eyebrow="DESENVOLVIMENTO"
-        title="Conteúdos para o seu momento"
-        text="Cursos, aulas e exercícios conectados aos desafios que você precisa resolver agora."
+        title="Conteúdos & Aulas Hotmart"
+        text="Cursos, aulas em vídeo e materiais práticos conectados aos desafios que você precisa resolver agora."
       />
       <div className="grid courses">
         {courses.map((c, i) => (
-          <article className="card courseTile" key={c}>
+          <article className="card courseTile" key={c.title}>
             <div className={`tileArt art${i + 1}`}>
-              <span>{["GESTÃO", "CARREIRA", "FINANÇAS"][i]}</span>
+              <span>{c.tag}</span>
               <b>DP</b>
             </div>
             <div>
-              <span className="eyebrow">CURSO</span>
-              <h3>{c}</h3>
-              <p>
-                {[
-                  "Estruture sua clínica para crescer com previsibilidade.",
-                  "Construa uma presença coerente com seus objetivos.",
-                  "Organize números, metas e decisões financeiras.",
-                ][i]}
-              </p>
-              <ProgressBar value={[42, 18, 0][i]} />
-              <small>{["5 de 12 aulas", "2 de 8 aulas", "10 aulas"][i]}</small>
-              <button className="secondary">{i === 0 ? "Continuar curso" : "Ver curso"}</button>
+              <span className="eyebrow">CURSO EM VÍDEO</span>
+              <h3>{c.title}</h3>
+              <p>{c.desc}</p>
+              <ProgressBar value={c.progress} />
+              <small>{c.progress}% concluído</small>
+              <button className="primary" style={{ marginTop: 12, width: "100%" }} onClick={() => setSection("hotmart")}>
+                ▶ Assistir no Hotmart Player
+              </button>
             </div>
           </article>
         ))}
@@ -1618,15 +2431,15 @@ function Progress({ completed }: { completed: number }) {
           <span>Ações concluídas</span>
         </div>
         <div className="card statHero">
-          <b>5</b>
-          <span>Aulas concluídas</span>
+          <b>6</b>
+          <span>Aulas Hotmart disponíveis</span>
         </div>
       </div>
       <div className="card timeline">
         <span className="eyebrow">HISTÓRICO RECENTE</span>
         <h2>Seus avanços</h2>
         {[
-          "Concluiu a aula 'Quem sou eu, onde estou e para onde quero ir?'",
+          "Concluiu a Aula 1.1 Hotmart: Diagnóstico Integrado e Avaliação de Comorbidades (CID-10)",
           "Finalizou o diagnóstico profissional inicial",
           "Definiu o objetivo 'Abrir minha própria clínica'",
           "Iniciou a etapa Clareza",
@@ -1672,10 +2485,10 @@ function Profile() {
             Especialidade<strong>Clínica Geral</strong>
           </label>
           <label>
-            Objetivo principal<strong>Abrir clínica própria</strong>
+            Conta Hotmart<strong>dentistadeproposito.club.hotmart.com (Ativo)</strong>
           </label>
           <label>
-            Principal dificuldade<strong>Posicionamento e gestão</strong>
+            Objetivo principal<strong>Abrir clínica própria</strong>
           </label>
           <label>
             Etapa atual<strong>Clareza</strong>
