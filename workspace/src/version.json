@@ -1,11 +1,16 @@
 {
-  "version": "1.3.7",
-  "commitMessage": "v1.3.7: Aplicar novo design visual completo com tema verde odontológico moderno (Emerald & Forest Green)",
-  "sha": "31b17e3",
-  "date": "2025-05-10T17:15:00Z",
+  "version": "1.3.8",
+  "commitMessage": "v1.3.8: Adicionar código de comorbidade (CID-10), grau de risco sistêmico e filtros no diagnóstico dos clientes",
+  "sha": "c743da2",
+  "date": "2025-05-10T17:30:00Z",
   "author": "Self Construct Agent",
   "environment": "Produção / Ao vivo",
   "changelog": [
+    {
+      "version": "v1.3.8",
+      "message": "Adicionar códigos de comorbidade (CID-10) em cada paciente, alertas de risco sistêmico clínico e novos campos no cadastro",
+      "date": "Hoje"
+    },
     {
       "version": "v1.3.7",
       "message": "Tema verde odontológico moderno e sofisticado aplicado em todos os elementos, barras, cartões e navegação",
@@ -34,16 +39,6 @@
     {
       "version": "v1.3.2",
       "message": "Otimização responsiva completa para celular com gaveta lateral e navegação inferior",
-      "date": "Hoje"
-    },
-    {
-      "version": "v1.3.1",
-      "message": "Manter exibição da versão exclusivamente na barra lateral",
-      "date": "Hoje"
-    },
-    {
-      "version": "v1.3.0",
-      "message": "Adicionar aba completa de Diagnóstico dos Clientes e destaque visual da versão",
       "date": "Hoje"
     }
   ]
