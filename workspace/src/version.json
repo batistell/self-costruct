@@ -1,11 +1,16 @@
 {
-  "version": "1.3.5",
-  "commitMessage": "v1.3.5: Fechar dialogs com Backspace/Escape, ocultar recarregar no mobile e melhorias visuais",
-  "sha": "c3f8e91",
-  "date": "2025-05-10T16:30:00Z",
+  "version": "1.3.6",
+  "commitMessage": "v1.3.6: Remover barra superior e botão nova aba, adicionar navegação completa com Back e Forward no histórico",
+  "sha": "a84f92d",
+  "date": "2025-05-10T17:00:00Z",
   "author": "Self Construct Agent",
   "environment": "Produção / Ao vivo",
   "changelog": [
+    {
+      "version": "v1.3.6",
+      "message": "Remover barra superior e botão de nova aba; suporte completo a histórico e botões Voltar (Back) e Avançar (Forward)",
+      "date": "Hoje"
+    },
     {
       "version": "v1.3.5",
       "message": "Fechar dialogs e modais com Backspace e Escape, proteger fechamento de tela e ocultar recarregar no mobile",
