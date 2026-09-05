@@ -6,10 +6,10 @@
     "dev": "tsx watch src/index.ts"
   },
   "dependencies": {
+    "@google/genai": "latest",
     "@octokit/rest": "latest",
     "dotenv": "latest",
-    "express": "latest",
-    "openai": "latest"
+    "express": "latest"
   },
   "devDependencies": {
     "tsx": "latest",
