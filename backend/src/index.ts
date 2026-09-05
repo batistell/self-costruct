@@ -160,7 +160,7 @@ app.post("/api/chat", async (req, res) => {
             latestActivities.push(evt.activity);
           }
 
-          // Continuously save ongoing processing activities into H2
+          // Continuously save ongoing processing activities into H2 file database
           updateMessagePartial(clientAssistantMessageId, {
             activities: [...latestActivities],
             status: evt.type === "tool_start" ? `Executando: ${evt.activity.description}` : "Processando...",
@@ -178,7 +178,7 @@ app.post("/api/chat", async (req, res) => {
           saveMessage({
             id: clientAssistantMessageId,
             role: "assistant",
-            text: evt.text || "Operação finalizada.",
+            text: evt.text || "Operação finalizada com sucesso.",
             activities: latestActivities,
             status: undefined,
             createdAt: Date.now(),
@@ -191,7 +191,7 @@ app.post("/api/chat", async (req, res) => {
     } catch (error) {
       console.error("[backend/stream]", error);
       const errMsg = error instanceof Error ? error.message : String(error);
-      // Persist the error assistant response into H2 Database
+      // Persist the error assistant response into H2 Database with all accumulated activities
       saveMessage({
         id: clientAssistantMessageId,
         role: "assistant",
@@ -238,7 +238,7 @@ app.post("/api/chat", async (req, res) => {
     saveMessage({
       id: clientAssistantMessageId,
       role: "assistant",
-      text: result.text || "Concluído.",
+      text: result.text || "Operação finalizada com sucesso.",
       activities: result.activities,
       status: undefined,
       createdAt: Date.now(),
