@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import ReactDOM from "react-dom/client";
 import versionData from "./version.json";
 import "./styles.css";
@@ -143,7 +143,7 @@ function VersionModal({ isOpen, onClose }: { isOpen: boolean; onClose: () => voi
               <small>Build ativo e implantado em produção</small>
             </div>
           </div>
-          <button className="versionCloseBtn" onClick={onClose} aria-label="Fechar modal">✕</button>
+          <button className="versionCloseBtn" onClick={onClose} aria-label="Fechar modal" title="Pressione Backspace ou Esc para fechar">✕</button>
         </div>
 
         <div className="versionModalBody">
@@ -197,12 +197,20 @@ function VersionModal({ isOpen, onClose }: { isOpen: boolean; onClose: () => voi
   );
 }
 
-function ClientsDiagnosticSection() {
+function ClientsDiagnosticSection({
+  selectedClient,
+  setSelectedClient,
+  showNewModal,
+  setShowNewModal,
+}: {
+  selectedClient: ClientDiagnosticItem | null;
+  setSelectedClient: (c: ClientDiagnosticItem | null) => void;
+  showNewModal: boolean;
+  setShowNewModal: (open: boolean) => void;
+}) {
   const [clients, setClients] = useState<ClientDiagnosticItem[]>(initialClients);
   const [filter, setFilter] = useState<string>("Todos");
   const [searchTerm, setSearchTerm] = useState<string>("");
-  const [selectedClient, setSelectedClient] = useState<ClientDiagnosticItem | null>(null);
-  const [showNewModal, setShowNewModal] = useState<boolean>(false);
 
   // New client form state
   const [newClientName, setNewClientName] = useState("");
@@ -466,7 +474,7 @@ function ClientsDiagnosticSection() {
 
       {/* Selected Client Detail Modal */}
       {selectedClient && (
-        <div className="versionModalOverlay" onClick={() => setSelectedClient(null)}>
+        <div className="versionModalOverlay" onClick={() => setSelectedClient(null)} role="dialog" aria-modal="true">
           <div className="versionModalCard clientDetailModalCard" onClick={(e) => e.stopPropagation()}>
             <div className="versionModalHeader">
               <div className="versionModalTitleGroup">
@@ -476,7 +484,7 @@ function ClientsDiagnosticSection() {
                   <small>{selectedClient.id} · {selectedClient.age} anos · Categoria: {selectedClient.category}</small>
                 </div>
               </div>
-              <button className="versionCloseBtn" onClick={() => setSelectedClient(null)}>✕</button>
+              <button className="versionCloseBtn" onClick={() => setSelectedClient(null)} aria-label="Fechar modal" title="Pressione Backspace ou Esc para fechar">✕</button>
             </div>
 
             <div className="versionModalBody">
@@ -556,7 +564,7 @@ function ClientsDiagnosticSection() {
 
       {/* New Client Modal */}
       {showNewModal && (
-        <div className="versionModalOverlay" onClick={() => setShowNewModal(false)}>
+        <div className="versionModalOverlay" onClick={() => setShowNewModal(false)} role="dialog" aria-modal="true">
           <div className="versionModalCard" onClick={(e) => e.stopPropagation()}>
             <div className="versionModalHeader">
               <div className="versionModalTitleGroup">
@@ -566,7 +574,7 @@ function ClientsDiagnosticSection() {
                   <small>Cadastre um novo caso clínico na plataforma</small>
                 </div>
               </div>
-              <button className="versionCloseBtn" onClick={() => setShowNewModal(false)}>✕</button>
+              <button className="versionCloseBtn" onClick={() => setShowNewModal(false)} aria-label="Fechar formulário" title="Pressione Backspace ou Esc para fechar">✕</button>
             </div>
 
             <form onSubmit={handleAddClient}>
@@ -676,10 +684,68 @@ function ClientsDiagnosticSection() {
 export default function App() {
   const [section, setSection] = useState<Section>("dashboard");
   const [showVersionModal, setShowVersionModal] = useState(false);
+  const [selectedClient, setSelectedClient] = useState<ClientDiagnosticItem | null>(null);
+  const [showNewModal, setShowNewModal] = useState<boolean>(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [tasks, setTasks] = useState<Task[]>(() => {
     try { return JSON.parse(localStorage.getItem("dp_tasks") || "null") || defaultTasks; } catch { return defaultTasks; }
   });
+
+  const isAnyModalOrDrawerOpen = showVersionModal || selectedClient !== null || showNewModal || mobileMenuOpen;
+
+  // Handle Backspace and Escape keyboard events to close any open dialog/modal/drawer smoothly
+  useEffect(() => {
+    function handleKeyDown(e: KeyboardEvent) {
+      if (!isAnyModalOrDrawerOpen) return;
+
+      const activeEl = document.activeElement as HTMLElement | null;
+      const isTyping =
+        activeEl &&
+        (activeEl.tagName === "INPUT" ||
+          activeEl.tagName === "TEXTAREA" ||
+          activeEl.isContentEditable);
+
+      // If user pressed Backspace while NOT actively editing text, OR pressed Escape anytime:
+      if ((e.key === "Backspace" && !isTyping) || e.key === "Escape") {
+        e.preventDefault(); // Prevent browser back action that closes/exits the window
+        e.stopPropagation();
+
+        if (showVersionModal) {
+          setShowVersionModal(false);
+        } else if (selectedClient !== null) {
+          setSelectedClient(null);
+        } else if (showNewModal) {
+          setShowNewModal(false);
+        } else if (mobileMenuOpen) {
+          setMobileMenuOpen(false);
+        }
+      }
+    }
+
+    window.addEventListener("keydown", handleKeyDown, { capture: true });
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown, { capture: true });
+    };
+  }, [isAnyModalOrDrawerOpen, showVersionModal, selectedClient, showNewModal, mobileMenuOpen]);
+
+  // Mobile Back-button / History state handling so pressing phone back closes dialogs without exiting
+  useEffect(() => {
+    if (isAnyModalOrDrawerOpen) {
+      window.history.pushState({ modalOpen: true }, "");
+    }
+
+    function handlePopState() {
+      if (showVersionModal) setShowVersionModal(false);
+      if (selectedClient !== null) setSelectedClient(null);
+      if (showNewModal) setShowNewModal(false);
+      if (mobileMenuOpen) setMobileMenuOpen(false);
+    }
+
+    window.addEventListener("popstate", handlePopState);
+    return () => {
+      window.removeEventListener("popstate", handlePopState);
+    };
+  }, [isAnyModalOrDrawerOpen]);
 
   const completed = useMemo(() => tasks.filter(t => t.done).length, [tasks]);
   const toggle = (id: number) => {
@@ -842,7 +908,14 @@ export default function App() {
           )}
           {section === "journey" && <Journey setSection={handleNavClick} />}
           {section === "diagnostic" && <Diagnostic />}
-          {section === "clientsDiagnostic" && <ClientsDiagnosticSection />}
+          {section === "clientsDiagnostic" && (
+            <ClientsDiagnosticSection
+              selectedClient={selectedClient}
+              setSelectedClient={setSelectedClient}
+              showNewModal={showNewModal}
+              setShowNewModal={setShowNewModal}
+            />
+          )}
           {section === "goals" && <Goals setSection={handleNavClick} />}
           {section === "plan" && <Plan tasks={tasks} toggle={toggle} />}
           {section === "content" && <Content />}
