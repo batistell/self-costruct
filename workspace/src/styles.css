@@ -6,17 +6,22 @@ html,
 body,
 #root {
   margin: 0;
+  padding: 0;
   min-height: 100%;
+  width: 100%;
+  overflow-x: hidden;
   font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   background: #f0f4f9;
   color: #1e293b;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  -webkit-tap-highlight-color: transparent;
 }
 
 button,
 input,
-select {
+select,
+textarea {
   font: inherit;
 }
 
@@ -25,12 +30,19 @@ button {
   touch-action: manipulation;
 }
 
+input,
+select,
+textarea {
+  font-size: 14px;
+}
+
 .shell {
   min-height: 100vh;
   display: grid;
   grid-template-columns: 240px minmax(0, 1fr);
   background: #f0f4f9;
   position: relative;
+  width: 100%;
 }
 
 /* Sidebar */
@@ -46,6 +58,7 @@ button {
   border-right: 1px solid rgba(255, 255, 255, 0.08);
   z-index: 100;
   overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 .sidebarTopBar {
@@ -99,15 +112,16 @@ button {
 
 .mobileMenuCloseBtn {
   display: none;
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
   color: #ffffff;
-  width: 34px;
-  height: 34px;
-  border-radius: 8px;
-  font-size: 14px;
+  width: 36px;
+  height: 36px;
+  border-radius: 9px;
+  font-size: 16px;
   align-items: center;
   justify-content: center;
+  cursor: pointer;
 }
 
 .sidebar nav {
@@ -136,7 +150,7 @@ button {
   display: flex;
   gap: 10px;
   align-items: center;
-  font-size: 12.5px;
+  font-size: 13px;
   font-weight: 500;
   transition: background 0.15s ease, color 0.15s ease;
   position: relative;
@@ -172,7 +186,7 @@ button {
   color: #ffffff;
   font-size: 9px;
   font-weight: 800;
-  padding: 1px 6px;
+  padding: 2px 6px;
   border-radius: 6px;
   text-transform: uppercase;
   letter-spacing: 0.05em;
@@ -280,9 +294,9 @@ button {
 .mobileDrawerBackdrop {
   position: fixed;
   inset: 0;
-  background: rgba(11, 23, 42, 0.7);
+  background: rgba(11, 23, 42, 0.75);
   backdrop-filter: blur(4px);
-  z-index: 99;
+  z-index: 999;
   animation: fadeIn 0.2s ease-out;
 }
 
@@ -291,6 +305,7 @@ button {
   min-width: 0;
   display: flex;
   flex-direction: column;
+  width: 100%;
 }
 
 .mainHeader {
@@ -321,9 +336,10 @@ button {
   border: 1px solid #cbd5e1;
   color: #0f172a;
   border-radius: 8px;
-  padding: 6px 10px;
-  font-size: 12px;
+  padding: 7px 12px;
+  font-size: 13px;
   font-weight: 700;
+  cursor: pointer;
 }
 
 .headerTitleWrapper {
@@ -333,10 +349,10 @@ button {
 }
 
 .headerTitle {
-  font-size: 13px;
-  color: #334155;
+  font-size: 14px;
+  color: #0f172a;
   font-weight: 700;
-  letter-spacing: 0.02em;
+  letter-spacing: 0.01em;
 }
 
 .headerSectionPill {
@@ -360,7 +376,7 @@ button {
   color: #475569;
   border-radius: 9px;
   padding: 7px 12px;
-  font-size: 11.5px;
+  font-size: 12px;
   font-weight: 600;
   transition: all 0.15s ease;
 }
@@ -485,7 +501,7 @@ button {
   background: none;
   color: #2563eb;
   font-weight: 700;
-  font-size: 11px;
+  font-size: 11.5px;
   padding: 4px;
   transition: color 0.15s ease;
 }
@@ -515,7 +531,7 @@ button {
 
 .quickCalloutLeft p {
   margin: 0;
-  font-size: 12px;
+  font-size: 12.5px;
   color: #475569;
 }
 
@@ -651,11 +667,12 @@ button {
   border-radius: 10px;
   padding: 10px 16px;
   font-weight: 700;
-  font-size: 12px;
+  font-size: 12.5px;
   transition: all 0.15s ease;
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  text-decoration: none;
 }
 
 .primary {
@@ -709,8 +726,9 @@ button {
   grid-template-columns: auto 1fr auto;
   align-items: center;
   gap: 10px;
-  padding: 11px 0;
+  padding: 12px 0;
   border-bottom: 1px solid #f1f5f9;
+  cursor: pointer;
 }
 
 .tasks label:last-child {
@@ -722,10 +740,10 @@ button {
 }
 
 .check {
-  width: 18px;
-  height: 18px;
+  width: 20px;
+  height: 20px;
   border: 1.5px solid #94a3b8;
-  border-radius: 5px;
+  border-radius: 6px;
   position: relative;
   transition: all 0.15s ease;
   flex-shrink: 0;
@@ -740,7 +758,7 @@ button {
   content: "✓";
   position: absolute;
   color: #ffffff;
-  font-size: 11px;
+  font-size: 12px;
   left: 3px;
   top: 0px;
   font-weight: 800;
@@ -752,14 +770,14 @@ button {
 }
 
 .tasks label b {
-  font-size: 11.5px;
+  font-size: 12.5px;
   font-weight: 600;
   line-height: 1.35;
   color: #1e293b;
 }
 
 .tasks label small {
-  font-size: 9.5px;
+  font-size: 10px;
   color: #64748b;
   margin-top: 3px;
 }
@@ -770,7 +788,7 @@ button {
 }
 
 .pill {
-  font-size: 9.5px !important;
+  font-size: 10px !important;
   padding: 4px 8px;
   background: #eff6ff;
   border: 1px solid #bfdbfe;
@@ -806,12 +824,12 @@ button {
 }
 
 .score div > b {
-  font-size: 12px;
+  font-size: 13px;
   color: #0f172a;
 }
 
 .score p {
-  font-size: 10px;
+  font-size: 11px;
   color: #64748b;
   line-height: 1.45;
 }
@@ -819,13 +837,13 @@ button {
 .miniMetrics {
   margin-top: 16px;
   display: grid;
-  gap: 9px;
+  gap: 10px;
 }
 
 .miniMetrics > div > span {
   display: flex;
   justify-content: space-between;
-  font-size: 10px;
+  font-size: 11px;
   color: #475569;
 }
 
@@ -834,7 +852,7 @@ button {
 }
 
 .progress {
-  height: 7px;
+  height: 8px;
   background: #e2e8f0;
   border-radius: 999px;
   overflow: hidden;
@@ -882,12 +900,12 @@ button {
 }
 
 .course p {
-  font-size: 10px;
+  font-size: 11px;
   color: #64748b;
 }
 
 .course small {
-  font-size: 9px;
+  font-size: 10px;
   color: #64748b;
 }
 
@@ -908,7 +926,7 @@ button {
 }
 
 .bigProgress span {
-  font-size: 10px;
+  font-size: 11px;
   color: #64748b;
 }
 
@@ -925,12 +943,12 @@ button {
 }
 
 .stats b {
-  font-size: 17px;
+  font-size: 18px;
   color: #0f172a;
 }
 
 .stats span {
-  font-size: 9px;
+  font-size: 10px;
   color: #64748b;
 }
 
@@ -1051,7 +1069,7 @@ button {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-size: 12px;
+  font-size: 12.5px;
   font-weight: 600;
   color: #1e293b;
 }
@@ -1061,7 +1079,7 @@ button {
 }
 
 .dimItem small {
-  font-size: 9.5px;
+  font-size: 10px;
   color: #64748b;
   display: block;
   margin-top: 4px;
@@ -1085,9 +1103,9 @@ button {
   background: #ffffff;
   border: 1px solid #cbd5e1;
   color: #475569;
-  padding: 7px 14px;
+  padding: 8px 14px;
   border-radius: 999px;
-  font-size: 11.5px;
+  font-size: 12px;
   font-weight: 600;
   display: flex;
   align-items: center;
@@ -1109,9 +1127,9 @@ button {
 
 .pillCount {
   background: rgba(0, 0, 0, 0.08);
-  padding: 1px 6px;
+  padding: 2px 7px;
   border-radius: 999px;
-  font-size: 10px;
+  font-size: 10.5px;
 }
 
 .filterPillBtn.active .pillCount {
@@ -1126,10 +1144,10 @@ button {
 
 .clientSearchBox input {
   width: 100%;
-  padding: 8px 30px 8px 12px;
+  padding: 9px 32px 9px 14px;
   border: 1px solid #cbd5e1;
   border-radius: 999px;
-  font-size: 12px;
+  font-size: 13px;
   background: #ffffff;
   outline: none;
   transition: border-color 0.15s ease;
@@ -1142,13 +1160,14 @@ button {
 
 .clearSearchBtn {
   position: absolute;
-  right: 10px;
+  right: 12px;
   top: 50%;
   transform: translateY(-50%);
   background: none;
   border: none;
   color: #94a3b8;
-  font-size: 11px;
+  font-size: 12px;
+  cursor: pointer;
 }
 
 .clientsListGrid {
@@ -1222,14 +1241,14 @@ button {
 }
 
 .clientAgeInfo {
-  font-size: 10.5px;
+  font-size: 11px;
   color: #64748b;
   display: block;
   margin-top: 2px;
 }
 
 .clientCategoryBadge {
-  font-size: 9.5px;
+  font-size: 10px;
   font-weight: 700;
   padding: 3px 8px;
   border-radius: 6px;
@@ -1277,7 +1296,7 @@ button {
 
 .diagLabel {
   display: block;
-  font-size: 8.5px;
+  font-size: 9px;
   font-weight: 800;
   color: #64748b;
   letter-spacing: 0.06em;
@@ -1286,7 +1305,7 @@ button {
 
 .diagIssueBox p {
   margin: 0;
-  font-size: 11.5px;
+  font-size: 12px;
   color: #1e293b;
   line-height: 1.4;
   font-weight: 500;
@@ -1316,7 +1335,7 @@ button {
 }
 
 .scoreStateText {
-  font-size: 9.5px;
+  font-size: 10px;
   color: #64748b;
   display: block;
   margin-top: 2px;
@@ -1330,7 +1349,7 @@ button {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 6px 12px;
-  font-size: 10.5px;
+  font-size: 11px;
   color: #475569;
   border-top: 1px dashed #e2e8f0;
   padding-top: 10px;
@@ -1354,7 +1373,7 @@ button {
 
 .nextStepBox strong {
   display: block;
-  font-size: 11.5px;
+  font-size: 12px;
   color: #1e40af;
   font-weight: 600;
 }
@@ -1367,8 +1386,8 @@ button {
 }
 
 .btnSmall {
-  padding: 6px 12px;
-  font-size: 11px;
+  padding: 7px 14px;
+  font-size: 11.5px;
 }
 
 /* Modal details */
@@ -1427,12 +1446,12 @@ button {
 }
 
 .diagMetricBarRow span {
-  font-size: 11px;
+  font-size: 11.5px;
   color: #475569;
 }
 
 .diagMetricBarRow strong {
-  font-size: 11px;
+  font-size: 11.5px;
   color: #1d4ed8;
 }
 
@@ -1473,13 +1492,13 @@ button {
 }
 
 .journeyRow p {
-  font-size: 11px;
+  font-size: 12px;
   color: #64748b;
   margin: 5px 0;
 }
 
 .status {
-  font-size: 9px;
+  font-size: 9.5px;
   text-transform: uppercase;
   letter-spacing: 0.08em;
   color: #64748b;
@@ -1515,7 +1534,7 @@ button {
 }
 
 .diagnosticHero p {
-  font-size: 12px;
+  font-size: 12.5px;
   color: #475569;
   line-height: 1.55;
   max-width: 620px;
@@ -1528,7 +1547,7 @@ button {
 .metric > div {
   display: flex;
   justify-content: space-between;
-  font-size: 12px;
+  font-size: 12.5px;
   font-weight: 600;
 }
 
@@ -1537,7 +1556,7 @@ button {
 }
 
 .metric p {
-  font-size: 10px;
+  font-size: 11px;
   color: #64748b;
   margin-bottom: 0;
 }
@@ -1551,7 +1570,7 @@ button {
 }
 
 .goalHero p {
-  font-size: 12px;
+  font-size: 12.5px;
   color: #475569;
   max-width: 650px;
 }
@@ -1563,7 +1582,7 @@ button {
 }
 
 .goalMeta span {
-  font-size: 10px;
+  font-size: 10.5px;
   color: #64748b;
 }
 
@@ -1586,12 +1605,12 @@ button {
 }
 
 .goalSmall p {
-  font-size: 11px;
+  font-size: 11.5px;
   color: #64748b;
 }
 
 .goalSmall small {
-  font-size: 9px;
+  font-size: 10px;
   color: #2563eb;
   font-weight: 600;
 }
@@ -1622,7 +1641,7 @@ button {
 }
 
 .planSummary span {
-  font-size: 9px;
+  font-size: 9.5px;
   color: #64748b;
 }
 
@@ -1664,13 +1683,13 @@ button {
 }
 
 .courseTile p {
-  font-size: 10px;
+  font-size: 11px;
   color: #64748b;
   min-height: 38px;
 }
 
 .courseTile small {
-  font-size: 9px;
+  font-size: 9.5px;
   color: #64748b;
   display: block;
 }
@@ -1692,7 +1711,7 @@ button {
 }
 
 .statHero span {
-  font-size: 10px;
+  font-size: 10.5px;
   color: #64748b;
 }
 
@@ -1727,12 +1746,12 @@ button {
 }
 
 .timeline p {
-  font-size: 11px;
+  font-size: 11.5px;
   color: #1e293b;
 }
 
 .timeline small {
-  font-size: 9px;
+  font-size: 9.5px;
   color: #64748b;
   margin-top: 3px;
 }
@@ -1764,7 +1783,7 @@ button {
 }
 
 .profileTop p {
-  font-size: 11px;
+  font-size: 11.5px;
   color: #64748b;
   margin: 4px 0;
 }
@@ -1790,7 +1809,7 @@ button {
 
 .profileGrid strong {
   display: block;
-  font-size: 12px;
+  font-size: 12.5px;
   text-transform: none;
   letter-spacing: 0;
   color: #0f172a;
@@ -1802,7 +1821,7 @@ button {
 .versionModalOverlay {
   position: fixed;
   inset: 0;
-  background: rgba(11, 23, 42, 0.7);
+  background: rgba(11, 23, 42, 0.75);
   backdrop-filter: blur(6px);
   z-index: 9999;
   display: flex;
@@ -1822,7 +1841,7 @@ button {
   border-radius: 20px;
   max-width: 560px;
   width: 100%;
-  max-height: 90vh;
+  max-height: 88vh;
   box-shadow: 0 20px 45px rgba(15, 23, 42, 0.25);
   border: 1px solid #dbe4ee;
   overflow: hidden;
@@ -1840,7 +1859,7 @@ button {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 18px 20px;
+  padding: 16px 20px;
   background: #f8fafc;
   border-bottom: 1px solid #e2e8f0;
   flex-shrink: 0;
@@ -1900,6 +1919,7 @@ button {
   flex-direction: column;
   gap: 16px;
   overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
   flex: 1;
 }
 
@@ -2033,12 +2053,13 @@ button {
   bottom: 0;
   left: 0;
   right: 0;
-  height: 62px;
+  height: 60px;
   background: #0b172a;
   border-top: 1px solid rgba(255, 255, 255, 0.12);
-  z-index: 90;
+  z-index: 900;
   grid-template-columns: repeat(5, 1fr);
   box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.25);
+  padding-bottom: env(safe-area-inset-bottom, 0);
 }
 
 .bottomNavItem {
@@ -2052,6 +2073,8 @@ button {
   gap: 3px;
   padding: 6px 2px;
   transition: color 0.15s ease, background 0.15s ease;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .bottomNavItem:hover {
@@ -2060,7 +2083,7 @@ button {
 
 .bottomNavItem.active {
   color: #60a5fa;
-  background: rgba(37, 99, 235, 0.15);
+  background: rgba(37, 99, 235, 0.2);
 }
 
 .bottomNavIcon {
@@ -2075,7 +2098,7 @@ button {
 }
 
 /* =========================================
-   RESPONSIVE MEDIA QUERIES
+   RESPONSIVE MEDIA QUERIES (TABLET & MOBILE)
    ========================================= */
 
 @media (max-width: 960px) {
@@ -2114,24 +2137,26 @@ button {
   .shell {
     display: block;
     min-height: 100vh;
+    width: 100vw;
+    overflow-x: hidden;
   }
 
   /* Desktop sidebar hidden; becomes slide-out drawer */
   .sidebar {
     position: fixed;
     top: 0;
-    left: -290px;
+    left: 0;
     bottom: 0;
     width: 280px;
     height: 100vh;
     z-index: 1000;
-    box-shadow: 4px 0 24px rgba(0, 0, 0, 0.45);
+    box-shadow: 4px 0 24px rgba(0, 0, 0, 0.55);
     transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1);
-    transform: translateX(0);
+    transform: translateX(-100%);
   }
 
   .sidebar.mobileOpen {
-    transform: translateX(290px);
+    transform: translateX(0);
   }
 
   .mobileMenuCloseBtn {
@@ -2143,16 +2168,18 @@ button {
   }
 
   .mainHeader {
-    padding: 0 16px;
-    height: 54px;
+    padding: 0 14px;
+    height: 52px;
   }
 
   .headerTitle {
-    font-size: 12px;
+    font-size: 13px;
   }
 
   .content {
-    padding: 18px 14px 85px; /* Extra bottom padding for the fixed bottom navigation */
+    padding: 16px 14px 85px; /* Extra bottom padding for the mobile bottom nav bar */
+    width: 100%;
+    overflow-x: hidden;
   }
 
   .mobileBottomNav {
@@ -2162,10 +2189,13 @@ button {
   .welcome {
     align-items: flex-start;
     flex-direction: column;
-    gap: 16px;
+    gap: 14px;
   }
 
-  .welcome h1,
+  .welcome h1 {
+    font-size: 26px;
+  }
+
   .pageTitle h1 {
     font-size: 24px;
   }
@@ -2184,6 +2214,11 @@ button {
     width: 100%;
     justify-content: space-between;
     flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .quickCalloutRight .primary {
+    width: 100%;
   }
 
   .currentCallout,
@@ -2197,12 +2232,14 @@ button {
   .currentCallout .primary,
   .journeyRow .primary {
     justify-self: start;
+    width: 100%;
   }
 
   .journeySteps {
-    grid-template-columns: repeat(5, 100px);
+    grid-template-columns: repeat(5, 90px);
     overflow-x: auto;
     padding-bottom: 10px;
+    -webkit-overflow-scrolling: touch;
   }
 
   .journeySteps:before {
@@ -2236,6 +2273,7 @@ button {
   .clientsControlBar {
     flex-direction: column;
     align-items: stretch;
+    gap: 12px;
   }
 
   .filterPills {
@@ -2243,6 +2281,7 @@ button {
     flex-wrap: nowrap;
     padding-bottom: 4px;
     -webkit-overflow-scrolling: touch;
+    width: 100%;
   }
 
   .filterPillBtn {
@@ -2252,6 +2291,7 @@ button {
 
   .clientSearchBox {
     width: 100%;
+    min-width: unset;
   }
 
   .course {
@@ -2271,15 +2311,17 @@ button {
   .profileTop {
     align-items: flex-start;
     flex-wrap: wrap;
+    gap: 12px;
   }
 
   .profileTop .secondary {
     margin-left: 0;
+    width: 100%;
   }
 
   .pageTitleRow {
     flex-direction: column;
-    gap: 8px;
+    gap: 10px;
   }
 
   .addClientBtn {
@@ -2289,5 +2331,19 @@ button {
 
   .versionGrid {
     grid-template-columns: 1fr;
+  }
+
+  .versionModalCard {
+    max-height: 94vh;
+    border-radius: 16px;
+  }
+
+  .versionModalHeader {
+    padding: 14px 16px;
+  }
+
+  .versionModalBody {
+    padding: 16px;
+    gap: 12px;
   }
 }
