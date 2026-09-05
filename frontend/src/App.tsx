@@ -25,8 +25,26 @@ export default function App() {
         headers: { "content-type": "application/json" },
         body: JSON.stringify({ message }),
       });
-      const body = await response.json();
-      if (!response.ok) throw new Error(body.error ?? "Agent request failed");
+
+      const raw = await response.text();
+      let body: any = {};
+
+      if (raw.trim()) {
+        try {
+          body = JSON.parse(raw);
+        } catch {
+          throw new Error(`HTTP ${response.status}: expected JSON but received: ${raw.slice(0, 500)}`);
+        }
+      }
+
+      if (!response.ok) {
+        throw new Error(body.error ?? raw || `Agent request failed with HTTP ${response.status}`);
+      }
+
+      if (!raw.trim()) {
+        throw new Error(`Agent returned an empty response (HTTP ${response.status})`);
+      }
+
       setActivities(body.activities ?? []);
       setMessages((current) => [...current, { role: "assistant", text: body.text || "Done." }]);
       if ((body.activities ?? []).some((activity: Activity) => activity.tool === "deploy_commit")) {
