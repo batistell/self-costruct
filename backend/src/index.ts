@@ -1,0 +1,31 @@
+import "dotenv/config";
+import express from "express";
+import { runAgent } from "./agent.js";
+
+if (!process.env.OPENAI_API_KEY) {
+  console.error("OPENAI_API_KEY is missing. Create a local .env file before starting Self Construct.");
+  process.exit(1);
+}
+
+const app = express();
+const port = Number(process.env.PORT ?? 3001);
+
+app.use(express.json({ limit: "10mb" }));
+
+app.get("/health", (_req, res) => res.json({ ok: true }));
+
+app.post("/api/chat", async (req, res) => {
+  const message = String(req.body?.message ?? "").trim();
+  if (!message) return res.status(400).json({ error: "message is required" });
+  try {
+    const result = await runAgent(message);
+    res.json(result);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: error instanceof Error ? error.message : String(error) });
+  }
+});
+
+app.listen(port, "127.0.0.1", () => {
+  console.log(`[backend] listening on http://127.0.0.1:${port}`);
+});

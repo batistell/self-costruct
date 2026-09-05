@@ -1,0 +1,13 @@
+{
+  "name": "self-construct",
+  "private": true,
+  "version": "0.1.0",
+  "workspaces": ["frontend", "backend", "workspace", "supervisor"],
+  "scripts": {
+    "start": "bash scripts/start.sh",
+    "install:all": "npm install"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "name": "@self-construct/supervisor",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start:once": "tsx src/index.ts"
+  },
+  "dependencies": {
+    "express": "latest"
+  },
+  "devDependencies": {
+    "tsx": "latest",
+    "typescript": "latest"
+  }
+}
