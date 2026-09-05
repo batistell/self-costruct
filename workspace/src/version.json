@@ -1,11 +1,16 @@
 {
-  "version": "1.3.1",
-  "commitMessage": "v1.3.1: Manter exibição da versão exclusivamente na barra lateral",
-  "sha": "a81d4e2",
-  "date": "2025-05-10T14:30:00Z",
+  "version": "1.3.2",
+  "commitMessage": "v1.3.2: Otimização responsiva completa para celular com menu mobile, barra inferior e navegação fluida",
+  "sha": "b92e71c",
+  "date": "2025-05-10T15:00:00Z",
   "author": "Self Construct Agent",
   "environment": "Produção / Ao vivo",
   "changelog": [
+    {
+      "version": "v1.3.2",
+      "message": "Otimização responsiva completa para celular com menu mobile, barra inferior e navegação fluida",
+      "date": "Hoje"
+    },
     {
       "version": "v1.3.1",
       "message": "Manter exibição da versão exclusivamente na barra lateral",
