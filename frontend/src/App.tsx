@@ -40,19 +40,19 @@ export type H2DbInfo = {
 };
 
 const CURRENT_PLATFORM_VERSION = {
-  version: "1.3.6",
-  commitMessage: "v1.3.6: Remover barra superior e botão nova aba, adicionar navegação completa com Back e Forward no histórico",
-  sha: "a84f92d",
+  version: "1.3.8",
+  commitMessage: "v1.3.8: Adicionar código de comorbidade (CID-10), grau de risco sistêmico e filtros no diagnóstico dos clientes",
+  sha: "4e25b5f",
   author: "Self Construct Agent",
   environment: "Produção / Ao vivo",
   changelog: [
+    { version: "v1.3.8", message: "Adicionar códigos de comorbidade (CID-10) em cada paciente, alertas de risco sistêmico clínico e novos campos no cadastro", date: "Hoje" },
+    { version: "v1.3.7", message: "Tema verde odontológico moderno e sofisticado aplicado em todos os elementos, barras, cartões e navegação", date: "Hoje" },
     { version: "v1.3.6", message: "Remover barra superior e botão de nova aba; suporte completo a histórico e botões Voltar (Back) e Avançar (Forward)", date: "Hoje" },
     { version: "v1.3.5", message: "Fechar dialogs e modais com Backspace e Escape, proteger fechamento de tela e ocultar recarregar no mobile", date: "Hoje" },
     { version: "v1.3.4", message: "Chat como aba lateral deslizante (drawer) no celular e tablets", date: "Hoje" },
     { version: "v1.3.3", message: "Corrigir URL dinâmica do preview para acesso no celular e tablets via IP de rede", date: "Hoje" },
     { version: "v1.3.2", message: "Otimização responsiva completa para celular com gaveta lateral e navegação inferior", date: "Hoje" },
-    { version: "v1.3.1", message: "Manter exibição da versão exclusivamente na barra lateral", date: "Hoje" },
-    { version: "v1.3.0", message: "Adicionar aba completa de Diagnóstico dos Clientes e destaque visual da versão", date: "Hoje" },
   ]
 };
 
