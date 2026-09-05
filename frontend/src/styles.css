@@ -69,6 +69,26 @@ body,
   flex-direction: column;
 }
 
+.headerSubRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.h2Badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: #192330;
+  border: 1px solid #2d3e52;
+  color: #7dd3fc;
+  font-size: 10px;
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-weight: 600;
+}
+
 .agentPane header strong,
 .previewPane header strong {
   font-size: 14px;
@@ -151,6 +171,7 @@ body,
   flex-direction: column;
   gap: 10px;
   transition: border-color 0.2s ease;
+  position: relative;
 }
 
 .messages article.user {
@@ -169,6 +190,7 @@ body,
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 8px;
 }
 
 .messageHeader b {
@@ -176,6 +198,104 @@ body,
   font-weight: 600;
   color: #94a3b8;
   letter-spacing: 0.3px;
+}
+
+.messageHeaderActions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.msgActionBtn {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #94a3b8;
+  border-radius: 5px;
+  padding: 2px 6px;
+  font-size: 11px;
+  cursor: pointer;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.msgActionBtn:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: #f1f5f9;
+  border-color: rgba(255, 255, 255, 0.25);
+}
+
+.msgActionBtn.delete:hover {
+  background: rgba(239, 68, 68, 0.2);
+  border-color: rgba(239, 68, 68, 0.4);
+  color: #fca5a5;
+}
+
+.msgEditContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.msgEditTextarea {
+  width: 100%;
+  border: 1px solid #38bdf8;
+  border-radius: 8px;
+  background: #0d1117;
+  color: #f1f5f9;
+  padding: 8px 10px;
+  font-family: inherit;
+  font-size: 13px;
+  line-height: 1.4;
+  resize: vertical;
+  min-height: 60px;
+}
+
+.msgEditButtons {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.msgSaveBtn {
+  background: #0284c7;
+  border: 1px solid #38bdf8;
+  color: #ffffff;
+  padding: 4px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.msgSaveBtn:hover:not(:disabled) {
+  background: #0369a1;
+}
+
+.msgSaveBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.msgCancelBtn {
+  background: #1e2531;
+  border: 1px solid #2d3848;
+  color: #94a3b8;
+  padding: 4px 10px;
+  font-size: 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.msgCancelBtn:hover:not(:disabled) {
+  background: #2b3545;
+  color: #f1f5f9;
 }
 
 .liveBadge {
