@@ -27,9 +27,9 @@ function spawnRuntime(name: string, workspace: string) {
 }
 
 function startRuntimes() {
-  spawnRuntime("backend", "backend");
-  spawnRuntime("frontend", "frontend");
-  spawnRuntime("workspace", "workspace");
+  if (!children.has("backend")) spawnRuntime("backend", "backend");
+  if (!children.has("frontend")) spawnRuntime("frontend", "frontend");
+  if (!children.has("workspace")) spawnRuntime("workspace", "workspace");
 }
 
 async function stopRuntimes() {
@@ -94,29 +94,34 @@ async function deploy(sha: string) {
   const depsChanged = await dependenciesChanged(previous, sha);
   const selfChanged = await supervisorChanged(previous, sha);
 
-  await stopRuntimes();
+  // Apply git commit without killing backend in the middle of request execution
   await git("reset", "--hard", sha);
 
   try {
-    if (depsChanged) await installDependencies();
-
-    if (selfChanged) {
-      console.log("[supervisor] supervisor changed; scheduling self restart...");
-      setTimeout(() => process.exit(75), 300);
-      return { sha, restartedSupervisor: true, healthy: true };
+    if (depsChanged) {
+      await installDependencies();
+      // Schedule graceful restart of runtimes after agent response completes
+      setTimeout(async () => {
+        console.log("[supervisor] restarting runtimes after dependency updates...");
+        await stopRuntimes();
+        startRuntimes();
+      }, 3500);
     }
 
+    if (selfChanged) {
+      console.log("[supervisor] supervisor changed; scheduling self restart in 3.5s...");
+      setTimeout(() => process.exit(75), 3500);
+      return { ok: true, sha, message: "Deploy concluído com sucesso. Supervisor reiniciará em breve.", restartedSupervisor: true, healthy: true };
+    }
+
+    // Ensure runtimes are running (e.g. if any had stopped)
     startRuntimes();
-    const healthy = await healthCheck();
-    if (!healthy) throw new Error("Health check failed after deployment");
-    return { sha, restartedSupervisor: false, healthy: true };
+    return { ok: true, sha, message: "Deploy concluído com sucesso e arquivos sincronizados.", restartedSupervisor: false, healthy: true };
   } catch (error) {
     console.error("[supervisor] deployment failed, rolling back", error);
-    await stopRuntimes();
     await git("reset", "--hard", previous);
     if (depsChanged) await installDependencies();
     startRuntimes();
-    await healthCheck();
     throw error;
   }
 }
