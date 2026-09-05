@@ -15,9 +15,10 @@ body,
 
 .shell {
   display: grid;
-  grid-template-columns: minmax(360px, 44%) 1fr;
+  grid-template-columns: minmax(380px, 46%) 1fr;
   height: 100vh;
   overflow: hidden;
+  position: relative;
   transition: grid-template-columns 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
@@ -36,7 +37,12 @@ body,
   border-right: 1px solid #232830;
   background: #0f1216;
   overflow: hidden;
+  position: relative;
   transition: opacity 0.2s ease, visibility 0.2s ease;
+}
+
+.agentPane.drag-active {
+  border-color: #38bdf8;
 }
 
 .shell.collapsed .agentPane {
@@ -143,7 +149,7 @@ body,
   border: 1px solid #202630;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 10px;
   transition: border-color 0.2s ease;
 }
 
@@ -225,6 +231,109 @@ body,
   color: #64748b;
   font-style: italic;
   font-size: 12px;
+}
+
+/* Attachments inside user message view */
+.messageAttachmentsContainer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 2px;
+}
+
+.messageAttachmentCard {
+  border-radius: 8px;
+  overflow: hidden;
+  max-width: 100%;
+}
+
+.messageAttachmentCard.is-image {
+  max-width: 240px;
+}
+
+.imageAttachmentLink {
+  position: relative;
+  display: block;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid #2e3b4e;
+  background: #090c10;
+  transition: transform 0.15s ease, border-color 0.15s ease;
+}
+
+.imageAttachmentLink:hover {
+  border-color: #38bdf8;
+  transform: translateY(-1px);
+}
+
+.messageAttachmentImage {
+  display: block;
+  max-width: 100%;
+  max-height: 180px;
+  object-fit: cover;
+}
+
+.imageOverlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: rgba(11, 15, 22, 0.85);
+  backdrop-filter: blur(4px);
+  padding: 4px 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 6px;
+  font-size: 10.5px;
+}
+
+.imageOverlayName {
+  color: #e2e8f0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 140px;
+}
+
+.imageOverlaySize {
+  color: #94a3b8;
+  flex-shrink: 0;
+}
+
+.docAttachmentChip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #111722;
+  border: 1px solid #283547;
+  border-radius: 8px;
+  padding: 6px 10px;
+  font-size: 12px;
+}
+
+.docIcon {
+  font-size: 16px;
+}
+
+.docInfo {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.docName {
+  font-weight: 500;
+  color: #cbd5e1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 200px;
+}
+
+.docSize {
+  font-size: 10.5px;
+  color: #64748b;
 }
 
 /* Operation logs container */
@@ -514,16 +623,47 @@ body,
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 }
 
-form {
-  display: grid;
-  grid-template-columns: 1fr auto;
+/* Chat form and input */
+.chatForm {
+  display: flex;
+  flex-direction: column;
   gap: 8px;
-  padding: 12px 16px;
+  padding: 10px 14px 14px 14px;
   border-top: 1px solid #232830;
   background: #101419;
 }
 
+.inputRow {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+}
+
+.attachButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #1a222e;
+  border: 1px solid #2e3a4e;
+  color: #cbd5e1;
+  font-size: 18px;
+  padding: 0;
+  width: 42px;
+  height: 42px;
+  border-radius: 10px;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.attachButton:hover:not(:disabled) {
+  background: #253346;
+  border-color: #38bdf8;
+  color: #fff;
+}
+
 textarea {
+  flex: 1;
   resize: none;
   border: 1px solid #2f3846;
   border-radius: 10px;
@@ -547,27 +687,179 @@ textarea:disabled {
   cursor: not-allowed;
 }
 
-button {
+.sendBtn {
+  height: 42px;
   border: 1px solid #333d4d;
   background: #1d2430;
   color: #eef2f6;
-  border-radius: 9px;
-  padding: 8px 16px;
+  border-radius: 10px;
+  padding: 0 16px;
   cursor: pointer;
   font-family: inherit;
   font-size: 13px;
-  font-weight: 500;
+  font-weight: 600;
+  flex-shrink: 0;
   transition: background 0.15s, border-color 0.15s, color 0.15s;
 }
 
-button:hover:not(:disabled) {
-  background: #283242;
-  border-color: #4a586d;
+.sendBtn:hover:not(:disabled) {
+  background: #0284c7;
+  border-color: #38bdf8;
+  color: #ffffff;
 }
 
-button:disabled {
+.sendBtn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+}
+
+/* Attachment queue preview above textarea */
+.attachmentQueueContainer {
+  background: #141922;
+  border: 1px solid #242e3e;
+  border-radius: 8px;
+  padding: 8px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.attachmentQueueHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 11px;
+  font-weight: 600;
+  color: #94a3b8;
+}
+
+.clearAttachmentsBtn {
+  background: none;
+  border: none;
+  color: #f87171;
+  padding: 0;
+  font-size: 11px;
+  cursor: pointer;
+}
+
+.clearAttachmentsBtn:hover {
+  text-decoration: underline;
+}
+
+.attachmentQueueList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  max-height: 120px;
+  overflow-y: auto;
+}
+
+.attachmentQueueItem {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: #1a222e;
+  border: 1px solid #2d3b4e;
+  border-radius: 6px;
+  padding: 3px 6px 3px 6px;
+  font-size: 11.5px;
+  max-width: 200px;
+}
+
+.attachmentQueueThumb {
+  width: 24px;
+  height: 24px;
+  border-radius: 4px;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.attachmentQueueIcon {
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+.attachmentQueueMeta {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  flex: 1;
+}
+
+.attachmentQueueName {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-weight: 500;
+  color: #e2e8f0;
+  font-size: 11px;
+}
+
+.attachmentQueueSize {
+  font-size: 9.5px;
+  color: #64748b;
+}
+
+.attachmentRemoveBtn {
+  background: none;
+  border: none;
+  color: #94a3b8;
+  padding: 2px 4px;
+  font-size: 11px;
+  cursor: pointer;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.attachmentRemoveBtn:hover {
+  background: rgba(239, 68, 68, 0.2);
+  color: #f87171;
+}
+
+/* Drag and drop overlay */
+.dragDropOverlay {
+  position: absolute;
+  top: 56px;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(11, 15, 22, 0.88);
+  backdrop-filter: blur(4px);
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  pointer-events: none;
+}
+
+.dragDropCard {
+  border: 2px dashed #38bdf8;
+  background: rgba(56, 189, 248, 0.08);
+  border-radius: 16px;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  color: #38bdf8;
+}
+
+.dragIcon {
+  font-size: 48px;
+}
+
+.dragDropCard strong {
+  font-size: 16px;
+}
+
+.dragDropCard span {
+  font-size: 12px;
+  color: #94a3b8;
 }
 
 .previewPane {
