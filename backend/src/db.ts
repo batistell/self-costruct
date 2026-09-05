@@ -45,8 +45,13 @@ interface H2DatabaseSchema {
   };
 }
 
-const DB_DIR = path.resolve(process.cwd(), "data");
-const DB_FILE = process.env.H2_DB_PATH || path.resolve(DB_DIR, "h2_messages.db");
+function getDbFilePath(): string {
+  if (process.env.H2_DB_PATH) return process.env.H2_DB_PATH;
+  const rootDir = process.cwd().endsWith("backend")
+    ? path.resolve(process.cwd(), "..")
+    : process.cwd();
+  return path.resolve(rootDir, "data", "h2_messages.db");
+}
 
 let inMemoryDb: H2DatabaseSchema = {
   engine: "H2 Database Engine (Embedded)",
@@ -63,21 +68,41 @@ let inMemoryDb: H2DatabaseSchema = {
 };
 
 function ensureDbDirectory() {
-  const dir = path.dirname(DB_FILE);
+  const dbFile = getDbFilePath();
+  const dir = path.dirname(dbFile);
   if (!fs.existsSync(dir)) {
     fs.mkdirSync(dir, { recursive: true });
   }
 }
 
+export function loadDbFromFile(): boolean {
+  try {
+    const dbFile = getDbFilePath();
+    if (fs.existsSync(dbFile)) {
+      const content = fs.readFileSync(dbFile, "utf-8");
+      if (content.trim()) {
+        const parsed = JSON.parse(content);
+        if (parsed && parsed.tables && Array.isArray(parsed.tables.MESSAGES)) {
+          inMemoryDb = parsed;
+          return true;
+        }
+      }
+    }
+  } catch (error) {
+    console.error("[H2 Database] Error reading database file:", error);
+  }
+  return false;
+}
+
 function flushToFile() {
   try {
     ensureDbDirectory();
+    const dbFile = getDbFilePath();
     inMemoryDb.meta.updatedAt = new Date().toISOString();
     const dataStr = JSON.stringify(inMemoryDb, null, 2);
-    // Write atomically using temporary file to avoid corruption
-    const tempFile = `${DB_FILE}.tmp.${Date.now()}`;
+    const tempFile = `${dbFile}.tmp.${Date.now()}`;
     fs.writeFileSync(tempFile, dataStr, "utf-8");
-    fs.renameSync(tempFile, DB_FILE);
+    fs.renameSync(tempFile, dbFile);
   } catch (error) {
     console.error("[H2 Database] Error flushing database to file:", error);
   }
@@ -86,21 +111,16 @@ function flushToFile() {
 export function initH2Database() {
   try {
     ensureDbDirectory();
-    if (fs.existsSync(DB_FILE)) {
-      const content = fs.readFileSync(DB_FILE, "utf-8");
-      if (content.trim()) {
-        const parsed = JSON.parse(content);
-        if (parsed && parsed.tables && Array.isArray(parsed.tables.MESSAGES)) {
-          inMemoryDb = parsed;
-          console.log(
-            `[H2 Database] Database loaded from file "${DB_FILE}" (${inMemoryDb.tables.MESSAGES.length} messages found).`
-          );
-          return;
-        }
-      }
+    const loaded = loadDbFromFile();
+    const dbFile = getDbFilePath();
+    if (loaded) {
+      console.log(
+        `[H2 Database] Database loaded from file "${dbFile}" (${inMemoryDb.tables.MESSAGES.length} messages found).`
+      );
+    } else {
+      console.log(`[H2 Database] Initializing fresh H2 file database at "${dbFile}"`);
+      flushToFile();
     }
-    console.log(`[H2 Database] Initializing fresh H2 file database at "${DB_FILE}"`);
-    flushToFile();
   } catch (error) {
     console.error("[H2 Database] Failed to initialize database file, resetting:", error);
     flushToFile();
@@ -108,10 +128,12 @@ export function initH2Database() {
 }
 
 export function getMessages(): H2Message[] {
+  loadDbFromFile();
   return inMemoryDb.tables.MESSAGES || [];
 }
 
 export function saveMessage(msg: H2Message): H2Message {
+  loadDbFromFile();
   const normalized: H2Message = {
     ...msg,
     createdAt: msg.createdAt || Date.now(),
@@ -130,6 +152,7 @@ export function saveMessage(msg: H2Message): H2Message {
 }
 
 export function saveAllMessages(messages: H2Message[]): void {
+  loadDbFromFile();
   inMemoryDb.tables.MESSAGES = messages.map((m) => ({
     ...m,
     createdAt: m.createdAt || Date.now(),
@@ -145,17 +168,19 @@ export function clearMessages(): void {
 }
 
 export function getH2Info() {
+  loadDbFromFile();
+  const dbFile = getDbFilePath();
   let fileSize = 0;
   try {
-    if (fs.existsSync(DB_FILE)) {
-      fileSize = fs.statSync(DB_FILE).size;
+    if (fs.existsSync(dbFile)) {
+      fileSize = fs.statSync(dbFile).size;
     }
   } catch {}
 
   return {
     engine: inMemoryDb.engine,
     version: inMemoryDb.version,
-    filePath: DB_FILE,
+    filePath: dbFile,
     fileSizeBytes: fileSize,
     totalMessages: inMemoryDb.tables.MESSAGES.length,
     lastSaved: inMemoryDb.meta.updatedAt,
