@@ -40,19 +40,17 @@ export type H2DbInfo = {
 };
 
 const CURRENT_PLATFORM_VERSION = {
-  version: "1.3.0",
-  commitMessage: "v1.3.0: Adicionar aba completa de Diagnóstico dos Clientes e destaque visual da versão",
-  sha: "e7b93c1",
+  version: "1.3.1",
+  commitMessage: "v1.3.1: Manter exibição da versão exclusivamente na barra lateral",
+  sha: "ee16266",
   author: "Self Construct Agent",
   environment: "Produção / Ao vivo",
   changelog: [
+    { version: "v1.3.1", message: "Manter exibição da versão exclusivamente na barra lateral", date: "Hoje" },
     { version: "v1.3.0", message: "Adicionar aba completa de Diagnóstico dos Clientes e destaque visual da versão", date: "Hoje" },
     { version: "v1.2.2", message: "Adicionar banner e badge fixo com versão e mensagem do commit em destaque", date: "Hoje" },
     { version: "v1.2.1", message: "Re-deploy e sincronização da versão da plataforma", date: "Hoje" },
     { version: "v1.2.0", message: "Adicionar numeração de versão nos commits e visualização interativa do commit atual", date: "Hoje" },
-    { version: "v1.1.0", message: "Implementar modal de detalhes da versão e histórico de changelog", date: "Hoje" },
-    { version: "v1.0.4", message: "Atualização visual completa da paleta para azul moderno", date: "Hoje" },
-    { version: "v1.0.3", message: "Personalização de dados de exemplo para Matheus Silva", date: "Hoje" },
   ]
 };
 
@@ -709,14 +707,6 @@ export default function App() {
           <div className="headerActions">
             <button
               type="button"
-              className="toggleBtn versionBadgeBtn"
-              onClick={() => setShowVersionModal(true)}
-              title="Ver versão e detalhes do commit atual"
-            >
-              <span className="dotActive">●</span> v{CURRENT_PLATFORM_VERSION.version} (Ver mais)
-            </button>
-            <button
-              type="button"
               className="toggleBtn iconOnly"
               onClick={handleClearChat}
               title="Limpar mensagens do chat e banco H2"
@@ -914,92 +904,11 @@ export default function App() {
               </button>
             )}
             <strong>Pré-visualização ao vivo</strong>
-            <button
-              type="button"
-              className="toggleBtn versionBadgeBtn"
-              onClick={() => setShowVersionModal(true)}
-              title="Ver detalhes da versão e commit"
-            >
-              <span className="dotActive">●</span> v{CURRENT_PLATFORM_VERSION.version} (Ver mais)
-            </button>
           </div>
           <button onClick={() => setPreviewKey((value) => value + 1)}>Recarregar</button>
         </header>
         <iframe key={previewKey} src="http://127.0.0.1:5174" title="Pré-visualização do Self Construct" />
       </section>
-
-      {/* Global Version Details Modal */}
-      {showVersionModal && (
-        <div className="versionModalOverlay" onClick={() => setShowVersionModal(false)} role="dialog" aria-modal="true">
-          <div className="versionModalCard" onClick={(e) => e.stopPropagation()}>
-            <div className="versionModalHeader">
-              <div className="versionModalTitleGroup">
-                <span className="versionPill">v{CURRENT_PLATFORM_VERSION.version}</span>
-                <div>
-                  <h3 style={{ margin: 0, fontSize: 16 }}>Detalhes da Versão e Commit</h3>
-                  <small style={{ color: "#64748b" }}>Informações do commit ativo no GitHub</small>
-                </div>
-              </div>
-              <button
-                className="versionCloseBtn"
-                onClick={() => setShowVersionModal(false)}
-                aria-label="Fechar modal"
-                style={{ background: "#f1f5f9", border: "1px solid #e2e8f0", borderRadius: "50%", width: 30, height: 30, cursor: "pointer" }}
-              >
-                ✕
-              </button>
-            </div>
-
-            <div className="versionModalBody" style={{ padding: "20px 24px", display: "flex", flexDirection: "column", gap: 16 }}>
-              <div style={{ background: "#eff6ff", border: "1px solid #bfdbfe", borderRadius: 12, padding: "14px 16px" }}>
-                <span style={{ display: "block", fontSize: 10, fontWeight: 800, color: "#2563eb", letterSpacing: "0.08em", marginBottom: 6 }}>
-                  MENSAGEM DO COMMIT ATUAL
-                </span>
-                <p style={{ margin: 0, fontSize: 14, fontWeight: 600, color: "#1e3a8a", lineHeight: 1.45 }}>
-                  {CURRENT_PLATFORM_VERSION.commitMessage}
-                </p>
-              </div>
-
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-                <div style={{ background: "#f8fafc", border: "1px solid #e2e8f0", borderRadius: 10, padding: "10px 14px" }}>
-                  <span style={{ display: "block", fontSize: 10, color: "#64748b", fontWeight: 700 }}>VERSÃO</span>
-                  <strong style={{ fontSize: 13, color: "#0f172a" }}>v{CURRENT_PLATFORM_VERSION.version}</strong>
-                </div>
-                <div style={{ background: "#f8fafc", border: "1px solid #e2e8f0", borderRadius: 10, padding: "10px 14px" }}>
-                  <span style={{ display: "block", fontSize: 10, color: "#64748b", fontWeight: 700 }}>STATUS</span>
-                  <strong style={{ fontSize: 13, color: "#16a34a" }}>● {CURRENT_PLATFORM_VERSION.environment}</strong>
-                </div>
-              </div>
-
-              <div style={{ borderTop: "1px solid #f1f5f9", paddingTop: 14 }}>
-                <span style={{ display: "block", fontSize: 10, fontWeight: 800, color: "#64748b", marginBottom: 8 }}>
-                  HISTÓRICO RECENTE DE COMMITS
-                </span>
-                <div style={{ display: "flex", flexDirection: "column", gap: 8, maxHeight: 160, overflowY: "auto" }}>
-                  {CURRENT_PLATFORM_VERSION.changelog.map((item, idx) => (
-                    <div key={idx} style={{ display: "flex", gap: 10, alignItems: "flex-start", background: "#f8fafc", border: "1px solid #f1f5f9", borderRadius: 8, padding: "6px 10px" }}>
-                      <span style={{ background: "#dbeafe", color: "#1d4ed8", fontSize: 10, fontWeight: 700, padding: "2px 6px", borderRadius: 4, flexShrink: 0 }}>
-                        {item.version}
-                      </span>
-                      <p style={{ margin: 0, fontSize: 12, color: "#334155" }}>{item.message}</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            <div style={{ display: "flex", justifyContent: "flex-end", padding: "12px 24px 16px", background: "#f8fafc", borderTop: "1px solid #e2e8f0" }}>
-              <button
-                type="button"
-                onClick={() => setShowVersionModal(false)}
-                style={{ background: "#2563eb", color: "#ffffff", border: "none", borderRadius: 8, padding: "8px 18px", fontWeight: 700, cursor: "pointer" }}
-              >
-                Fechar
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </main>
   );
 }
