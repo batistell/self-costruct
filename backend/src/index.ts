@@ -110,7 +110,28 @@ app.post("/api/chat", async (req, res) => {
     text: message,
     attachments: files.length > 0 ? files : undefined,
     createdAt: Date.now(),
+    isLive: false,
   });
+
+  // Persist the assistant message placeholder with live processing status immediately
+  saveMessage({
+    id: clientAssistantMessageId,
+    role: "assistant",
+    text: "",
+    status: "Iniciando processamento com a IA...",
+    activities: [],
+    createdAt: Date.now(),
+    isLive: true,
+  });
+
+  const previousHistory = getMessages()
+    .filter((m) => m.id !== clientUserMessageId && m.id !== clientAssistantMessageId && m.text)
+    .map((m) => ({ role: m.role, text: m.text }));
+
+  const history =
+    Array.isArray(req.body?.history) && req.body.history.length > 0
+      ? req.body.history
+      : previousHistory;
 
   const wantsStream =
     req.headers.accept?.includes("text/event-stream") ||
@@ -130,14 +151,27 @@ app.post("/api/chat", async (req, res) => {
     let latestActivities: any[] = [];
 
     try {
-      await runAgent({ message, files }, (evt) => {
-        if (evt.type === "tool_end" || evt.type === "tool_start") {
+      await runAgent({ message, files, history }, (evt) => {
+        if (evt.type === "tool_start" || evt.type === "tool_end") {
           const idx = latestActivities.findIndex((a) => a.id === evt.activity.id);
           if (idx >= 0) {
             latestActivities[idx] = evt.activity;
           } else {
             latestActivities.push(evt.activity);
           }
+
+          // Continuously save ongoing processing activities into H2
+          updateMessagePartial(clientAssistantMessageId, {
+            activities: [...latestActivities],
+            status: evt.type === "tool_start" ? `Executando: ${evt.activity.description}` : "Processando...",
+            isLive: true,
+          });
+        } else if (evt.type === "status") {
+          updateMessagePartial(clientAssistantMessageId, {
+            status: evt.message,
+            activities: [...latestActivities],
+            isLive: true,
+          });
         } else if (evt.type === "done") {
           latestActivities = evt.activities || latestActivities;
           // Persist the completed assistant response into H2 Database
@@ -146,7 +180,9 @@ app.post("/api/chat", async (req, res) => {
             role: "assistant",
             text: evt.text || "Operação finalizada.",
             activities: latestActivities,
+            status: undefined,
             createdAt: Date.now(),
+            isLive: false,
           });
         }
         sendEvent(evt);
@@ -161,7 +197,9 @@ app.post("/api/chat", async (req, res) => {
         role: "assistant",
         text: `Erro: ${errMsg}`,
         activities: latestActivities,
+        status: undefined,
         createdAt: Date.now(),
+        isLive: false,
       });
       sendEvent({
         type: "error",
@@ -173,14 +211,38 @@ app.post("/api/chat", async (req, res) => {
   }
 
   try {
-    const result = await runAgent({ message, files });
+    let latestActivities: any[] = [];
+    const result = await runAgent({ message, files, history }, (evt) => {
+      if (evt.type === "tool_start" || evt.type === "tool_end") {
+        const idx = latestActivities.findIndex((a) => a.id === evt.activity.id);
+        if (idx >= 0) {
+          latestActivities[idx] = evt.activity;
+        } else {
+          latestActivities.push(evt.activity);
+        }
+        updateMessagePartial(clientAssistantMessageId, {
+          activities: [...latestActivities],
+          status: evt.type === "tool_start" ? `Executando: ${evt.activity.description}` : "Processando...",
+          isLive: true,
+        });
+      } else if (evt.type === "status") {
+        updateMessagePartial(clientAssistantMessageId, {
+          status: evt.message,
+          activities: [...latestActivities],
+          isLive: true,
+        });
+      }
+    });
+
     // Persist completed assistant response into H2 Database
     saveMessage({
       id: clientAssistantMessageId,
       role: "assistant",
       text: result.text || "Concluído.",
       activities: result.activities,
+      status: undefined,
       createdAt: Date.now(),
+      isLive: false,
     });
     res.json(result);
   } catch (error) {
@@ -190,7 +252,10 @@ app.post("/api/chat", async (req, res) => {
       id: clientAssistantMessageId,
       role: "assistant",
       text: `Erro: ${errMsg}`,
+      activities: latestActivities,
+      status: undefined,
       createdAt: Date.now(),
+      isLive: false,
     });
     res.status(500).json({ error: errMsg });
   }
