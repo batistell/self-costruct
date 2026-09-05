@@ -1,0 +1,30 @@
+{
+  "version": "1.1.0",
+  "commitMessage": "v1.1.0: Implementar versionamento nos commits e visualização detalhada da versão",
+  "sha": "9ef8a1c4b723",
+  "date": "2025-05-10T12:00:00Z",
+  "author": "Self Construct Agent",
+  "environment": "Produção / Ao vivo",
+  "changelog": [
+    {
+      "version": "v1.1.0",
+      "message": "Implementar versionamento nos commits e modal de detalhes da versão",
+      "date": "Hoje"
+    },
+    {
+      "version": "v1.0.4",
+      "message": "Atualização visual completa da paleta para azul moderno",
+      "date": "Hoje"
+    },
+    {
+      "version": "v1.0.3",
+      "message": "Personalização de dados de exemplo para Matheus Silva",
+      "date": "Hoje"
+    },
+    {
+      "version": "v1.0.2",
+      "message": "Carregamento e sincronização do histórico do chat no H2 Database",
+      "date": "Hoje"
+    }
+  ]
+}
