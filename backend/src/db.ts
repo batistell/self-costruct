@@ -135,6 +135,20 @@ export function initH2Database() {
     const loaded = loadDbFromFile();
     const dbFile = getDbFilePath();
     if (loaded) {
+      // Normalize any stale live messages from previous backend runs if server restarted
+      let changed = false;
+      inMemoryDb.tables.MESSAGES.forEach((msg) => {
+        if (msg.isLive) {
+          msg.isLive = false;
+          if (!msg.text && (!msg.activities || msg.activities.length === 0)) {
+            msg.text = "Processamento concluído na sessão anterior.";
+          }
+          changed = true;
+        }
+      });
+      if (changed) {
+        flushToFile();
+      }
       console.log(
         `[H2 Database] Database loaded from file "${dbFile}" (${inMemoryDb.tables.MESSAGES.length} messages found).`
       );
