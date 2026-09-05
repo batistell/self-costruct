@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from "react";
 import ReactDOM from "react-dom/client";
+import versionData from "./version.json";
 import "./styles.css";
 
 type Section = "dashboard" | "journey" | "diagnostic" | "goals" | "plan" | "content" | "progress" | "profile";
@@ -29,8 +30,77 @@ function ProgressBar({ value }: { value: number }) {
   return <div className="progress"><div style={{ width: `${value}%` }} /></div>;
 }
 
+function VersionModal({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
+  if (!isOpen) return null;
+
+  return (
+    <div className="versionModalOverlay" onClick={onClose} role="dialog" aria-modal="true">
+      <div className="versionModalCard" onClick={(e) => e.stopPropagation()}>
+        <div className="versionModalHeader">
+          <div className="versionModalTitleGroup">
+            <span className="versionPill">v{versionData.version}</span>
+            <div>
+              <h3>Informações da Versão</h3>
+              <small>Detalhes do build e commit atual</small>
+            </div>
+          </div>
+          <button className="versionCloseBtn" onClick={onClose} aria-label="Fechar modal">✕</button>
+        </div>
+
+        <div className="versionModalBody">
+          <div className="versionInfoBox">
+            <span className="versionLabel">MENSAGEM DO COMMIT ATUAL</span>
+            <p className="commitMessageText">{versionData.commitMessage}</p>
+          </div>
+
+          <div className="versionGrid">
+            <div className="versionGridItem">
+              <span className="versionLabel">VERSÃO</span>
+              <strong>v{versionData.version}</strong>
+            </div>
+            <div className="versionGridItem">
+              <span className="versionLabel">STATUS</span>
+              <strong className="statusActive">● {versionData.environment}</strong>
+            </div>
+            <div className="versionGridItem">
+              <span className="versionLabel">HASH DO COMMIT</span>
+              <code>{versionData.sha}</code>
+            </div>
+            <div className="versionGridItem">
+              <span className="versionLabel">AUTOR</span>
+              <strong>{versionData.author}</strong>
+            </div>
+          </div>
+
+          {versionData.changelog && versionData.changelog.length > 0 && (
+            <div className="changelogSection">
+              <span className="versionLabel">HISTÓRICO RECENTE DE VERSÕES</span>
+              <div className="changelogList">
+                {versionData.changelog.map((item, idx) => (
+                  <div key={idx} className="changelogItem">
+                    <span className="changelogTag">{item.version}</span>
+                    <div className="changelogContent">
+                      <p>{item.message}</p>
+                      <small>{item.date}</small>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+
+        <div className="versionModalFooter">
+          <button className="primary" onClick={onClose}>Fechar</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function App() {
   const [section, setSection] = useState<Section>("dashboard");
+  const [showVersionModal, setShowVersionModal] = useState(false);
   const [tasks, setTasks] = useState<Task[]>(() => {
     try { return JSON.parse(localStorage.getItem("dp_tasks") || "null") || defaultTasks; } catch { return defaultTasks; }
   });
@@ -59,10 +129,28 @@ function App() {
       </nav>
       <div className="stageBox"><span>ETAPA ATUAL</span><b>Clareza</b><ProgressBar value={42}/><small>42% concluído</small></div>
       <div className="user"><span>M</span><div><b>Matheus Silva</b><small>Dentista</small></div></div>
+      <div className="sidebarFooterVersion">
+        <button className="versionTriggerBtn" onClick={() => setShowVersionModal(true)} title="Ver detalhes da versão e commit">
+          <span className="dotActive">●</span>
+          <span>v{versionData.version}</span>
+          <small>Ver mais →</small>
+        </button>
+      </div>
     </aside>
 
     <main className="main">
-      <header><span className="headerTitle">Dentista de Propósito</span><div><button>◇</button><button>? Ajuda</button></div></header>
+      <header>
+        <span className="headerTitle">Dentista de Propósito</span>
+        <div className="headerActionsRow">
+          <button className="headerVersionBadge" onClick={() => setShowVersionModal(true)} title="Ver mensagem do commit e versão">
+            <span className="dotActive">●</span>
+            <b>v{versionData.version}</b>
+            <span className="headerVersionAction">Ver mais</span>
+          </button>
+          <button>◇</button>
+          <button>? Ajuda</button>
+        </div>
+      </header>
       <div className="content">
         {section === "dashboard" && <Dashboard setSection={setSection} tasks={tasks} toggle={toggle} completed={completed} />}
         {section === "journey" && <Journey setSection={setSection} />}
@@ -74,6 +162,8 @@ function App() {
         {section === "profile" && <Profile />}
       </div>
     </main>
+
+    <VersionModal isOpen={showVersionModal} onClose={() => setShowVersionModal(false)} />
   </div>;
 }
 
