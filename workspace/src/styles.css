@@ -10,6 +10,8 @@ body,
   font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   background: #f0f4f9;
   color: #1e293b;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 button,
@@ -20,6 +22,7 @@ select {
 
 button {
   cursor: pointer;
+  touch-action: manipulation;
 }
 
 .shell {
@@ -41,7 +44,15 @@ button {
   display: flex;
   flex-direction: column;
   border-right: 1px solid rgba(255, 255, 255, 0.08);
-  z-index: 10;
+  z-index: 100;
+  overflow-y: auto;
+}
+
+.sidebarTopBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 12px;
 }
 
 .brand {
@@ -52,7 +63,7 @@ button {
   border: 0;
   color: inherit;
   text-align: left;
-  padding: 0 6px 20px;
+  padding: 0 4px;
 }
 
 .brandMark {
@@ -66,6 +77,7 @@ button {
   font-weight: 900;
   letter-spacing: -0.04em;
   box-shadow: 0 4px 12px rgba(37, 99, 235, 0.35);
+  flex-shrink: 0;
 }
 
 .brand b,
@@ -85,11 +97,25 @@ button {
   color: #93c5fd;
 }
 
+.mobileMenuCloseBtn {
+  display: none;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #ffffff;
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  font-size: 14px;
+  align-items: center;
+  justify-content: center;
+}
+
 .sidebar nav {
   display: flex;
   flex-direction: column;
   gap: 3px;
   overflow-y: auto;
+  flex: 1;
 }
 
 .sidebar nav p {
@@ -105,15 +131,16 @@ button {
   background: transparent;
   color: #94a3b8;
   border-radius: 10px;
-  padding: 9px 12px;
+  padding: 10px 12px;
   text-align: left;
   display: flex;
   gap: 10px;
   align-items: center;
-  font-size: 12px;
+  font-size: 12.5px;
   font-weight: 500;
   transition: background 0.15s ease, color 0.15s ease;
   position: relative;
+  width: 100%;
 }
 
 .sidebar nav button:hover {
@@ -132,6 +159,7 @@ button {
   width: 18px;
   text-align: center;
   color: #60a5fa;
+  font-size: 14px;
 }
 
 .sidebar nav button.active i {
@@ -151,7 +179,7 @@ button {
 }
 
 .stageBox {
-  margin-top: auto;
+  margin-top: 14px;
   border: 1px solid rgba(255, 255, 255, 0.12);
   background: rgba(255, 255, 255, 0.04);
   padding: 12px 14px;
@@ -241,7 +269,6 @@ button {
   background: rgba(37, 99, 235, 0.3);
   border-color: #60a5fa;
   color: #ffffff;
-  transform: translateY(-1px);
 }
 
 .dotActive {
@@ -249,209 +276,76 @@ button {
   font-size: 11px;
 }
 
-.dotPulse {
-  width: 8px;
-  height: 8px;
-  background: #22c55e;
-  border-radius: 50%;
-  box-shadow: 0 0 0 2px rgba(34, 197, 94, 0.4);
-  display: inline-block;
-  animation: pulseDot 1.8s infinite;
-}
-
-@keyframes pulseDot {
-  0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7); }
-  70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(34, 197, 94, 0); }
-  100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); }
-}
-
-/* Top Version Banner - Highly Visible */
-.topVersionBanner {
-  background: linear-gradient(90deg, #0f172a, #1e3a8a 40%, #2563eb 85%);
-  color: #ffffff;
-  padding: 9px 28px;
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  font-size: 12px;
-  cursor: pointer;
-  transition: background 0.2s ease;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
-  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.15);
-}
-
-.topVersionBanner:hover {
-  background: linear-gradient(90deg, #020617, #172554 40%, #1d4ed8 85%);
-}
-
-.topVersionBadge {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  background: rgba(255, 255, 255, 0.2);
-  border: 1px solid rgba(255, 255, 255, 0.4);
-  padding: 3px 9px;
-  border-radius: 6px;
-  font-weight: 800;
-  letter-spacing: 0.02em;
-}
-
-.topVersionMessage {
-  flex: 1;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  color: #e2e8f0;
-  font-size: 12px;
-}
-
-.topVersionMessage strong {
-  color: #93c5fd;
-  margin-right: 4px;
-}
-
-.topVersionButton {
-  background: #ffffff;
-  color: #1e3a8a;
-  border: none;
-  padding: 4px 12px;
-  border-radius: 6px;
-  font-size: 11px;
-  font-weight: 800;
-  transition: all 0.15s ease;
-  flex-shrink: 0;
-}
-
-.topVersionButton:hover {
-  background: #eff6ff;
-  color: #1d4ed8;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
-}
-
-/* Version Notice in Dashboard */
-.versionDashboardNotice {
-  background: linear-gradient(135deg, #eff6ff, #dbeafe);
-  border: 1.5px solid #bfdbfe;
-  border-radius: 14px;
-  padding: 12px 18px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 14px;
-  margin-bottom: 20px;
-  cursor: pointer;
-  transition: all 0.15s ease;
-}
-
-.versionDashboardNotice:hover {
-  background: linear-gradient(135deg, #e0e7ff, #bfdbfe);
-  border-color: #93c5fd;
-  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.1);
-}
-
-.noticePill {
-  display: inline-block;
-  background: #2563eb;
-  color: #ffffff;
-  font-size: 10px;
-  font-weight: 800;
-  padding: 2px 8px;
-  border-radius: 5px;
-  letter-spacing: 0.05em;
-  margin-bottom: 4px;
-}
-
-.noticeCommit {
-  margin: 0;
-  font-size: 12.5px;
-  font-weight: 600;
-  color: #1e3a8a;
-}
-
-.noticeActionBtn {
-  background: #ffffff;
-  border: 1px solid #bfdbfe;
-  color: #1d4ed8;
-  font-size: 11px;
-  font-weight: 700;
-  padding: 6px 12px;
-  border-radius: 8px;
-  white-space: nowrap;
-}
-
-/* Floating Bottom Right Badge */
-.floatingVersionBadge {
+/* Mobile Drawer backdrop */
+.mobileDrawerBackdrop {
   position: fixed;
-  bottom: 18px;
-  right: 22px;
+  inset: 0;
+  background: rgba(11, 23, 42, 0.7);
+  backdrop-filter: blur(4px);
   z-index: 99;
-  background: #0f172a;
-  color: #ffffff;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 30px;
-  padding: 8px 16px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  box-shadow: 0 6px 20px rgba(15, 23, 42, 0.35);
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-  font-size: 11.5px;
+  animation: fadeIn 0.2s ease-out;
 }
 
-.floatingVersionBadge:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 10px 25px rgba(15, 23, 42, 0.45);
-  border-color: #60a5fa;
-  background: #1e293b;
-}
-
-.floatingVerText {
-  font-weight: 800;
-  color: #60a5fa;
-}
-
-.floatingCommitText {
-  color: #94a3b8;
-  font-size: 11px;
-  max-width: 180px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.floatingAction {
-  background: #2563eb;
-  color: #ffffff;
-  font-weight: 700;
-  font-size: 10px;
-  padding: 2px 7px;
-  border-radius: 12px;
-  margin-left: 4px;
-}
-
+/* Main Area */
 .main {
   min-width: 0;
+  display: flex;
+  flex-direction: column;
 }
 
-.main > header {
+.mainHeader {
   height: 58px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   border-bottom: 1px solid #dbe4ee;
-  background: rgba(240, 244, 249, 0.95);
+  background: rgba(240, 244, 249, 0.96);
   backdrop-filter: blur(8px);
   padding: 0 28px;
   position: sticky;
   top: 0;
-  z-index: 5;
+  z-index: 20;
+}
+
+.headerLeft {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.mobileMenuToggleBtn {
+  display: none;
+  align-items: center;
+  gap: 6px;
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  color: #0f172a;
+  border-radius: 8px;
+  padding: 6px 10px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.headerTitleWrapper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .headerTitle {
-  font-size: 12.5px;
-  color: #475569;
+  font-size: 13px;
+  color: #334155;
   font-weight: 700;
   letter-spacing: 0.02em;
+}
+
+.headerSectionPill {
+  background: #dbeafe;
+  color: #1d4ed8;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 6px;
 }
 
 .headerActionsRow {
@@ -460,59 +354,36 @@ button {
   gap: 8px;
 }
 
-.headerVersionBadge {
-  display: inline-flex;
-  align-items: center;
-  gap: 7px;
-  border: 1px solid #bfdbfe;
-  background: #eff6ff;
-  color: #1e3a8a;
-  border-radius: 9px;
-  padding: 6px 12px;
-  font-size: 11.5px;
-  font-weight: 700;
-  cursor: pointer;
-  transition: all 0.15s ease;
-  box-shadow: 0 1px 3px rgba(37, 99, 235, 0.08);
-}
-
-.headerVersionBadge:hover {
-  background: #dbeafe;
-  border-color: #60a5fa;
-  color: #1d4ed8;
-  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.16);
-}
-
-.headerVersionAction {
-  font-size: 10px;
-  color: #2563eb;
-  background: rgba(37, 99, 235, 0.12);
-  padding: 2px 7px;
-  border-radius: 6px;
-  font-weight: 600;
-}
-
-.main header button {
+.headerActionButton {
   border: 1px solid #cbd5e1;
   background: #ffffff;
   color: #475569;
   border-radius: 9px;
-  padding: 7px 11px;
-  font-size: 11px;
+  padding: 7px 12px;
+  font-size: 11.5px;
   font-weight: 600;
   transition: all 0.15s ease;
 }
 
-.main header button:hover {
+.headerActionButton:hover {
   background: #f8fafc;
   border-color: #94a3b8;
   color: #0f172a;
 }
 
+.headerActionButton.primaryAccent {
+  background: #eff6ff;
+  border-color: #bfdbfe;
+  color: #1d4ed8;
+  font-weight: 700;
+}
+
 .content {
   max-width: 1180px;
+  width: 100%;
   margin: auto;
   padding: 28px 36px 60px;
+  flex: 1;
 }
 
 .welcome {
@@ -662,6 +533,7 @@ button {
   padding: 6px 12px;
   border-radius: 999px;
   border: 1px solid #bae6fd;
+  white-space: nowrap;
 }
 
 .quickScorePill b {
@@ -777,10 +649,13 @@ button {
 .primary,
 .secondary {
   border-radius: 10px;
-  padding: 10px 14px;
+  padding: 10px 16px;
   font-weight: 700;
-  font-size: 11px;
+  font-size: 12px;
   transition: all 0.15s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .primary {
@@ -847,12 +722,13 @@ button {
 }
 
 .check {
-  width: 17px;
-  height: 17px;
+  width: 18px;
+  height: 18px;
   border: 1.5px solid #94a3b8;
   border-radius: 5px;
   position: relative;
   transition: all 0.15s ease;
+  flex-shrink: 0;
 }
 
 .tasks label.done .check {
@@ -864,9 +740,9 @@ button {
   content: "✓";
   position: absolute;
   color: #ffffff;
-  font-size: 10px;
+  font-size: 11px;
   left: 3px;
-  top: 0;
+  top: 0px;
   font-weight: 800;
 }
 
@@ -876,14 +752,14 @@ button {
 }
 
 .tasks label b {
-  font-size: 11px;
+  font-size: 11.5px;
   font-weight: 600;
   line-height: 1.35;
   color: #1e293b;
 }
 
 .tasks label small {
-  font-size: 9px;
+  font-size: 9.5px;
   color: #64748b;
   margin-top: 3px;
 }
@@ -894,7 +770,7 @@ button {
 }
 
 .pill {
-  font-size: 9px !important;
+  font-size: 9.5px !important;
   padding: 4px 8px;
   background: #eff6ff;
   border: 1px solid #bfdbfe;
@@ -958,7 +834,7 @@ button {
 }
 
 .progress {
-  height: 6px;
+  height: 7px;
   background: #e2e8f0;
   border-radius: 999px;
   overflow: hidden;
@@ -1245,7 +1121,7 @@ button {
 
 .clientSearchBox {
   position: relative;
-  min-width: 260px;
+  min-width: 240px;
 }
 
 .clientSearchBox input {
@@ -1492,7 +1368,7 @@ button {
 
 .btnSmall {
   padding: 6px 12px;
-  font-size: 10.5px;
+  font-size: 11px;
 }
 
 /* Modal details */
@@ -1925,17 +1801,14 @@ button {
 /* Version Modal Styling */
 .versionModalOverlay {
   position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(11, 23, 42, 0.65);
+  inset: 0;
+  background: rgba(11, 23, 42, 0.7);
   backdrop-filter: blur(6px);
   z-index: 9999;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 20px;
+  padding: 16px;
   animation: modalFadeIn 0.2s ease-out;
 }
 
@@ -1949,9 +1822,12 @@ button {
   border-radius: 20px;
   max-width: 560px;
   width: 100%;
+  max-height: 90vh;
   box-shadow: 0 20px 45px rgba(15, 23, 42, 0.25);
   border: 1px solid #dbe4ee;
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
   animation: modalScaleUp 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
@@ -1964,9 +1840,10 @@ button {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 20px 24px;
+  padding: 18px 20px;
   background: #f8fafc;
   border-bottom: 1px solid #e2e8f0;
+  flex-shrink: 0;
 }
 
 .versionModalTitleGroup {
@@ -1988,7 +1865,7 @@ button {
 
 .versionModalHeader h3 {
   margin: 0;
-  font-size: 17px;
+  font-size: 16px;
   color: #0f172a;
   font-weight: 700;
 }
@@ -2009,6 +1886,7 @@ button {
   color: #64748b;
   font-size: 13px;
   transition: all 0.15s ease;
+  flex-shrink: 0;
 }
 
 .versionCloseBtn:hover {
@@ -2017,10 +1895,12 @@ button {
 }
 
 .versionModalBody {
-  padding: 22px 24px;
+  padding: 20px;
   display: flex;
   flex-direction: column;
-  gap: 18px;
+  gap: 16px;
+  overflow-y: auto;
+  flex: 1;
 }
 
 .versionInfoBox {
@@ -2042,7 +1922,7 @@ button {
 
 .commitMessageText {
   margin: 0;
-  font-size: 13.5px;
+  font-size: 13px;
   font-weight: 600;
   color: #1e3a8a;
   line-height: 1.45;
@@ -2140,20 +2020,77 @@ button {
 .versionModalFooter {
   display: flex;
   justify-content: flex-end;
-  padding: 14px 24px 18px;
+  padding: 14px 20px;
   background: #f8fafc;
   border-top: 1px solid #e2e8f0;
+  flex-shrink: 0;
 }
 
-@media (max-width: 900px) {
+/* Bottom Navigation Bar for Mobile */
+.mobileBottomNav {
+  display: none;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 62px;
+  background: #0b172a;
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+  z-index: 90;
+  grid-template-columns: repeat(5, 1fr);
+  box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.25);
+}
+
+.bottomNavItem {
+  background: transparent;
+  border: none;
+  color: #94a3b8;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  padding: 6px 2px;
+  transition: color 0.15s ease, background 0.15s ease;
+}
+
+.bottomNavItem:hover {
+  color: #e2e8f0;
+}
+
+.bottomNavItem.active {
+  color: #60a5fa;
+  background: rgba(37, 99, 235, 0.15);
+}
+
+.bottomNavIcon {
+  font-size: 18px;
+  line-height: 1;
+}
+
+.bottomNavLabel {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+/* =========================================
+   RESPONSIVE MEDIA QUERIES
+   ========================================= */
+
+@media (max-width: 960px) {
   .shell {
-    grid-template-columns: 200px 1fr;
+    grid-template-columns: 210px 1fr;
   }
   .content {
-    padding: 24px 20px;
+    padding: 24px 20px 40px;
   }
-  .grid.two,
-  .grid.four,
+  .grid.two {
+    grid-template-columns: 1fr;
+  }
+  .grid.four {
+    grid-template-columns: repeat(2, 1fr);
+  }
   .courses,
   .progressGrid,
   .clientsListGrid,
@@ -2162,7 +2099,7 @@ button {
   }
   .journeySteps {
     grid-template-columns: repeat(5, minmax(80px, 1fr));
-    overflow: auto;
+    overflow-x: auto;
     padding-bottom: 8px;
   }
   .course {
@@ -2171,47 +2108,84 @@ button {
   .profileGrid {
     grid-template-columns: 1fr;
   }
-  .floatingCommitText {
-    display: none;
-  }
 }
 
-@media (max-width: 640px) {
+@media (max-width: 768px) {
   .shell {
     display: block;
+    min-height: 100vh;
   }
+
+  /* Desktop sidebar hidden; becomes slide-out drawer */
   .sidebar {
-    position: relative;
-    height: auto;
-    padding: 14px;
+    position: fixed;
+    top: 0;
+    left: -290px;
+    bottom: 0;
+    width: 280px;
+    height: 100vh;
+    z-index: 1000;
+    box-shadow: 4px 0 24px rgba(0, 0, 0, 0.45);
+    transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+    transform: translateX(0);
   }
-  .sidebar nav,
-  .stageBox,
-  .user,
-  .sidebarFooterVersion {
-    display: none;
+
+  .sidebar.mobileOpen {
+    transform: translateX(290px);
   }
-  .brand {
-    padding: 0;
+
+  .mobileMenuCloseBtn {
+    display: inline-flex;
   }
-  .main > header {
-    position: relative;
-    padding: 0 14px;
+
+  .mobileMenuToggleBtn {
+    display: inline-flex;
   }
+
+  .mainHeader {
+    padding: 0 16px;
+    height: 54px;
+  }
+
+  .headerTitle {
+    font-size: 12px;
+  }
+
   .content {
-    padding: 20px 14px 40px;
+    padding: 18px 14px 85px; /* Extra bottom padding for the fixed bottom navigation */
   }
+
+  .mobileBottomNav {
+    display: grid;
+  }
+
   .welcome {
     align-items: flex-start;
     flex-direction: column;
+    gap: 16px;
   }
+
   .welcome h1,
   .pageTitle h1 {
-    font-size: 26px;
+    font-size: 24px;
   }
+
   .streak {
     width: 100%;
   }
+
+  .clientQuickCallout {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 14px;
+  }
+
+  .quickCalloutRight {
+    width: 100%;
+    justify-content: space-between;
+    flex-wrap: wrap;
+  }
+
   .currentCallout,
   .diagnosticHero,
   .journeyRow,
@@ -2219,46 +2193,101 @@ button {
   .diagHeroBox {
     grid-template-columns: 1fr;
   }
+
   .currentCallout .primary,
   .journeyRow .primary {
     justify-self: start;
   }
+
   .journeySteps {
-    grid-template-columns: repeat(5, 110px);
+    grid-template-columns: repeat(5, 100px);
     overflow-x: auto;
+    padding-bottom: 10px;
   }
+
+  .journeySteps:before {
+    left: 20px;
+    right: 20px;
+  }
+
   .grid.two,
   .grid.four,
   .metrics,
   .courses,
   .progressGrid,
-  .clientsListGrid {
+  .clientsListGrid,
+  .dimGrid {
     grid-template-columns: 1fr;
   }
+
+  .diagSummaryGrid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 10px;
+  }
+
+  .clientKpiCard {
+    padding: 12px 14px;
+  }
+
+  .clientKpiVal {
+    font-size: 24px;
+  }
+
+  .clientsControlBar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .filterPills {
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    padding-bottom: 4px;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .filterPillBtn {
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  .clientSearchBox {
+    width: 100%;
+  }
+
   .course {
     grid-template-columns: 1fr;
   }
+
   .goalMeta {
     flex-wrap: wrap;
+    gap: 16px;
   }
+
   .planSummary {
     grid-template-columns: 1fr 1fr;
+    gap: 8px;
   }
+
   .profileTop {
     align-items: flex-start;
     flex-wrap: wrap;
   }
+
   .profileTop .secondary {
     margin-left: 0;
   }
-  .headerTitle {
-    font-size: 10px;
-  }
-  .topVersionBanner {
-    padding: 6px 14px;
-    font-size: 11px;
-  }
+
   .pageTitleRow {
     flex-direction: column;
+    gap: 8px;
+  }
+
+  .addClientBtn {
+    width: 100%;
+    margin-top: 0;
+  }
+
+  .versionGrid {
+    grid-template-columns: 1fr;
   }
 }
