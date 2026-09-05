@@ -29,6 +29,7 @@ export interface H2Message {
   activities?: ActivityItem[];
   isLive?: boolean;
   createdAt?: number;
+  updatedAt?: number;
 }
 
 interface H2DatabaseSchema {
@@ -140,7 +141,19 @@ export function initH2Database() {
       inMemoryDb.tables.MESSAGES.forEach((msg) => {
         if (msg.isLive) {
           msg.isLive = false;
-          if (!msg.text && (!msg.activities || msg.activities.length === 0)) {
+          msg.updatedAt = Date.now();
+          if (msg.activities && msg.activities.length > 0) {
+            // Mark any unclosed running activities as completed
+            msg.activities.forEach((act) => {
+              if (act.status === "running") {
+                act.status = "success";
+                act.endTime = act.endTime || Date.now();
+              }
+            });
+            if (!msg.text) {
+              msg.text = "Processamento concluído. As ações e ferramentas executadas estão registradas acima.";
+            }
+          } else if (!msg.text) {
             msg.text = "Processamento concluído na sessão anterior.";
           }
           changed = true;
@@ -181,6 +194,7 @@ export function saveMessage(msg: H2Message): H2Message {
     activities: msg.activities !== undefined ? msg.activities : existing?.activities,
     isLive: msg.isLive !== undefined ? msg.isLive : (existing?.isLive ?? false),
     createdAt: msg.createdAt || existing?.createdAt || Date.now(),
+    updatedAt: Date.now(),
   };
 
   if (existingIdx >= 0) {
@@ -202,6 +216,7 @@ export function updateMessagePartial(id: string, partial: Partial<H2Message>): H
       ...existing,
       ...partial,
       createdAt: existing.createdAt || Date.now(),
+      updatedAt: Date.now(),
       isLive: partial.isLive !== undefined ? partial.isLive : existing.isLive,
     };
     inMemoryDb.tables.MESSAGES[existingIdx] = updated;
@@ -217,6 +232,7 @@ export function updateMessagePartial(id: string, partial: Partial<H2Message>): H
       status: partial.status,
       isLive: partial.isLive !== undefined ? partial.isLive : false,
       createdAt: partial.createdAt || Date.now(),
+      updatedAt: Date.now(),
     };
     inMemoryDb.tables.MESSAGES.push(newMsg);
     flushToFile();
@@ -240,6 +256,7 @@ export function saveAllMessages(messages: H2Message[]): void {
   inMemoryDb.tables.MESSAGES = messages.map((m) => ({
     ...m,
     createdAt: m.createdAt || Date.now(),
+    updatedAt: Date.now(),
     isLive: m.isLive !== undefined ? m.isLive : false,
   }));
   flushToFile();
