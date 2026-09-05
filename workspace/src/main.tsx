@@ -6,6 +6,28 @@ import "./styles.css";
 type Section = "dashboard" | "journey" | "diagnostic" | "clientsDiagnostic" | "goals" | "plan" | "content" | "progress" | "profile";
 type Task = { id: number; title: string; category: string; due: string; done: boolean };
 
+const VALID_SECTIONS: Section[] = [
+  "dashboard",
+  "journey",
+  "diagnostic",
+  "clientsDiagnostic",
+  "goals",
+  "plan",
+  "content",
+  "progress",
+  "profile"
+];
+
+function getInitialSection(): Section {
+  if (typeof window !== "undefined") {
+    const hash = window.location.hash.replace("#", "") as Section;
+    if (VALID_SECTIONS.includes(hash)) {
+      return hash;
+    }
+  }
+  return "dashboard";
+}
+
 type ClientDiagnosticItem = {
   id: string;
   name: string;
@@ -682,7 +704,7 @@ function ClientsDiagnosticSection({
 }
 
 export default function App() {
-  const [section, setSection] = useState<Section>("dashboard");
+  const [section, setSection] = useState<Section>(getInitialSection);
   const [showVersionModal, setShowVersionModal] = useState(false);
   const [selectedClient, setSelectedClient] = useState<ClientDiagnosticItem | null>(null);
   const [showNewModal, setShowNewModal] = useState<boolean>(false);
@@ -693,11 +715,60 @@ export default function App() {
 
   const isAnyModalOrDrawerOpen = showVersionModal || selectedClient !== null || showNewModal || mobileMenuOpen;
 
-  // Handle Backspace and Escape keyboard events to close any open dialog/modal/drawer smoothly
+  // Function to navigate between sections with full Browser History (Back & Forward) support
+  const navigateTo = (newSection: Section, replace = false) => {
+    setSection(newSection);
+    setMobileMenuOpen(false);
+
+    if (typeof window !== "undefined") {
+      const url = `#${newSection}`;
+      if (replace) {
+        window.history.replaceState({ section: newSection }, "", url);
+      } else if (window.location.hash !== url) {
+        window.history.pushState({ section: newSection }, "", url);
+      }
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  };
+
+  // Synchronize with initial URL hash
+  useEffect(() => {
+    const initial = getInitialSection();
+    if (window.location.hash !== `#${initial}`) {
+      window.history.replaceState({ section: initial }, "", `#${initial}`);
+    }
+  }, []);
+
+  // Browser Popstate (Back & Forward buttons, swipe gestures) listener
+  useEffect(() => {
+    function handlePopState(e: PopStateEvent) {
+      // If a modal or drawer is open, close it first
+      if (showVersionModal) setShowVersionModal(false);
+      if (selectedClient !== null) setSelectedClient(null);
+      if (showNewModal) setShowNewModal(false);
+      if (mobileMenuOpen) setMobileMenuOpen(false);
+
+      if (e.state && e.state.section && VALID_SECTIONS.includes(e.state.section)) {
+        setSection(e.state.section);
+      } else {
+        const hash = window.location.hash.replace("#", "") as Section;
+        if (VALID_SECTIONS.includes(hash)) {
+          setSection(hash);
+        } else {
+          setSection("dashboard");
+        }
+      }
+    }
+
+    window.addEventListener("popstate", handlePopState);
+    return () => {
+      window.removeEventListener("popstate", handlePopState);
+    };
+  }, [showVersionModal, selectedClient, showNewModal, mobileMenuOpen]);
+
+  // Handle Backspace and Escape keyboard events
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {
-      if (!isAnyModalOrDrawerOpen) return;
-
       const activeEl = document.activeElement as HTMLElement | null;
       const isTyping =
         activeEl &&
@@ -705,20 +776,21 @@ export default function App() {
           activeEl.tagName === "TEXTAREA" ||
           activeEl.isContentEditable);
 
-      // If user pressed Backspace while NOT actively editing text, OR pressed Escape anytime:
-      if ((e.key === "Backspace" && !isTyping) || e.key === "Escape") {
-        e.preventDefault(); // Prevent browser back action that closes/exits the window
-        e.stopPropagation();
+      if (isAnyModalOrDrawerOpen) {
+        // If modal is open, Backspace or Escape closes the dialog
+        if ((e.key === "Backspace" && !isTyping) || e.key === "Escape") {
+          e.preventDefault();
+          e.stopPropagation();
 
-        if (showVersionModal) {
-          setShowVersionModal(false);
-        } else if (selectedClient !== null) {
-          setSelectedClient(null);
-        } else if (showNewModal) {
-          setShowNewModal(false);
-        } else if (mobileMenuOpen) {
-          setMobileMenuOpen(false);
+          if (showVersionModal) setShowVersionModal(false);
+          else if (selectedClient !== null) setSelectedClient(null);
+          else if (showNewModal) setShowNewModal(false);
+          else if (mobileMenuOpen) setMobileMenuOpen(false);
         }
+      } else if (e.key === "Backspace" && !isTyping) {
+        // If no modal is open and user presses Backspace outside typing, navigate back
+        e.preventDefault();
+        window.history.back();
       }
     }
 
@@ -728,24 +800,20 @@ export default function App() {
     };
   }, [isAnyModalOrDrawerOpen, showVersionModal, selectedClient, showNewModal, mobileMenuOpen]);
 
-  // Mobile Back-button / History state handling so pressing phone back closes dialogs without exiting
-  useEffect(() => {
+  const handleGoBack = () => {
     if (isAnyModalOrDrawerOpen) {
-      window.history.pushState({ modalOpen: true }, "");
-    }
-
-    function handlePopState() {
       if (showVersionModal) setShowVersionModal(false);
       if (selectedClient !== null) setSelectedClient(null);
       if (showNewModal) setShowNewModal(false);
       if (mobileMenuOpen) setMobileMenuOpen(false);
+    } else {
+      window.history.back();
     }
+  };
 
-    window.addEventListener("popstate", handlePopState);
-    return () => {
-      window.removeEventListener("popstate", handlePopState);
-    };
-  }, [isAnyModalOrDrawerOpen]);
+  const handleGoForward = () => {
+    window.history.forward();
+  };
 
   const completed = useMemo(() => tasks.filter(t => t.done).length, [tasks]);
   const toggle = (id: number) => {
@@ -766,12 +834,6 @@ export default function App() {
     ["profile", "○", "Meu perfil"],
   ];
 
-  const handleNavClick = (id: Section) => {
-    setSection(id);
-    setMobileMenuOpen(false);
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  };
-
   return (
     <div className="shell">
       {/* Mobile Drawer Backdrop Overlay */}
@@ -786,7 +848,7 @@ export default function App() {
       {/* Main Sidebar (Desktop + Slide-in Mobile Drawer) */}
       <aside className={`sidebar ${mobileMenuOpen ? "mobileOpen" : ""}`}>
         <div className="sidebarTopBar">
-          <button className="brand" onClick={() => handleNavClick("dashboard")}>
+          <button className="brand" onClick={() => navigateTo("dashboard")}>
             <span className="brandMark">DP</span>
             <div className="brandText">
               <b>Dentista</b>
@@ -808,7 +870,7 @@ export default function App() {
             <button
               key={id}
               className={section === id ? "active" : ""}
-              onClick={() => handleNavClick(id)}
+              onClick={() => navigateTo(id)}
             >
               <i>{icon}</i>{label}
               {id === "clientsDiagnostic" && <span className="navNewBadge">Novo</span>}
@@ -819,7 +881,7 @@ export default function App() {
             <button
               key={id}
               className={section === id ? "active" : ""}
-              onClick={() => handleNavClick(id)}
+              onClick={() => navigateTo(id)}
             >
               <i>{icon}</i>{label}
             </button>
@@ -871,7 +933,28 @@ export default function App() {
               <span className="hamburgerIcon">☰</span>
               <span className="menuLabel">Menu</span>
             </button>
-            <div className="headerBrandGroup" onClick={() => handleNavClick("dashboard")}>
+
+            {/* In-app Back & Forward Navigation Controls */}
+            <div className="historyNavGroup">
+              <button
+                className="historyNavBtn"
+                onClick={handleGoBack}
+                title="Voltar página (Back)"
+                aria-label="Voltar no histórico"
+              >
+                ‹
+              </button>
+              <button
+                className="historyNavBtn"
+                onClick={handleGoForward}
+                title="Avançar página (Forward)"
+                aria-label="Avançar no histórico"
+              >
+                ›
+              </button>
+            </div>
+
+            <div className="headerBrandGroup" onClick={() => navigateTo("dashboard")}>
               <span className="headerBrandMark">DP</span>
               <span className="headerTitle">Dentista de Propósito</span>
             </div>
@@ -880,7 +963,7 @@ export default function App() {
           <div className="headerActionsRow">
             <button
               className={`headerActionButton ${section === "clientsDiagnostic" ? "primaryAccent" : ""}`}
-              onClick={() => handleNavClick("clientsDiagnostic")}
+              onClick={() => navigateTo("clientsDiagnostic")}
               title="Diagnóstico dos Clientes"
             >
               <span className="headerBtnIcon">👥</span>
@@ -888,7 +971,7 @@ export default function App() {
             </button>
             <button
               className={`headerActionButton userPillBtn ${section === "profile" ? "active" : ""}`}
-              onClick={() => handleNavClick("profile")}
+              onClick={() => navigateTo("profile")}
               title="Meu Perfil"
             >
               <span className="userAvatarDot">M</span>
@@ -900,13 +983,13 @@ export default function App() {
         <div className="content">
           {section === "dashboard" && (
             <Dashboard
-              setSection={handleNavClick}
+              setSection={navigateTo}
               tasks={tasks}
               toggle={toggle}
               completed={completed}
             />
           )}
-          {section === "journey" && <Journey setSection={handleNavClick} />}
+          {section === "journey" && <Journey setSection={navigateTo} />}
           {section === "diagnostic" && <Diagnostic />}
           {section === "clientsDiagnostic" && (
             <ClientsDiagnosticSection
@@ -916,7 +999,7 @@ export default function App() {
               setShowNewModal={setShowNewModal}
             />
           )}
-          {section === "goals" && <Goals setSection={handleNavClick} />}
+          {section === "goals" && <Goals setSection={navigateTo} />}
           {section === "plan" && <Plan tasks={tasks} toggle={toggle} />}
           {section === "content" && <Content />}
           {section === "progress" && <Progress completed={completed} />}
@@ -927,28 +1010,28 @@ export default function App() {
         <nav className="mobileBottomNav" aria-label="Navegação móvel inferior">
           <button
             className={`bottomNavItem ${section === "dashboard" ? "active" : ""}`}
-            onClick={() => handleNavClick("dashboard")}
+            onClick={() => navigateTo("dashboard")}
           >
             <span className="bottomNavIcon">⌂</span>
             <span className="bottomNavLabel">Início</span>
           </button>
           <button
             className={`bottomNavItem ${section === "clientsDiagnostic" ? "active" : ""}`}
-            onClick={() => handleNavClick("clientsDiagnostic")}
+            onClick={() => navigateTo("clientsDiagnostic")}
           >
             <span className="bottomNavIcon">👥</span>
             <span className="bottomNavLabel">Clientes</span>
           </button>
           <button
             className={`bottomNavItem ${section === "plan" ? "active" : ""}`}
-            onClick={() => handleNavClick("plan")}
+            onClick={() => navigateTo("plan")}
           >
             <span className="bottomNavIcon">✓</span>
             <span className="bottomNavLabel">Plano</span>
           </button>
           <button
             className={`bottomNavItem ${section === "diagnostic" ? "active" : ""}`}
-            onClick={() => handleNavClick("diagnostic")}
+            onClick={() => navigateTo("diagnostic")}
           >
             <span className="bottomNavIcon">◎</span>
             <span className="bottomNavLabel">Diagnóstico</span>
