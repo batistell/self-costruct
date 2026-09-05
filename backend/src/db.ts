@@ -115,7 +115,7 @@ function flushToFile() {
     const dbFile = getDbFilePath();
     inMemoryDb.meta.updatedAt = new Date().toISOString();
     const dataStr = JSON.stringify(inMemoryDb, null, 2);
-    const tempFile = `${dbFile}.tmp.${Date.now()}`;
+    const tempFile = `${dbFile}.tmp.${Date.now()}_${Math.random().toString(36).slice(2, 6)}`;
     fs.writeFileSync(tempFile, dataStr, "utf-8");
     fs.renameSync(tempFile, dbFile);
   } catch (error) {
@@ -155,13 +155,20 @@ export function getMessages(): H2Message[] {
 
 export function saveMessage(msg: H2Message): H2Message {
   loadDbFromFile();
+  const existingIdx = inMemoryDb.tables.MESSAGES.findIndex((m) => m.id === msg.id);
+  const existing = existingIdx >= 0 ? inMemoryDb.tables.MESSAGES[existingIdx] : undefined;
+
   const normalized: H2Message = {
-    ...msg,
-    createdAt: msg.createdAt || Date.now(),
-    isLive: false,
+    id: msg.id,
+    role: msg.role,
+    text: msg.text !== undefined ? msg.text : (existing?.text || ""),
+    attachments: msg.attachments !== undefined ? msg.attachments : existing?.attachments,
+    status: msg.status,
+    activities: msg.activities !== undefined ? msg.activities : existing?.activities,
+    isLive: msg.isLive !== undefined ? msg.isLive : (existing?.isLive ?? false),
+    createdAt: msg.createdAt || existing?.createdAt || Date.now(),
   };
 
-  const existingIdx = inMemoryDb.tables.MESSAGES.findIndex((m) => m.id === msg.id);
   if (existingIdx >= 0) {
     inMemoryDb.tables.MESSAGES[existingIdx] = normalized;
   } else {
@@ -181,7 +188,7 @@ export function updateMessagePartial(id: string, partial: Partial<H2Message>): H
       ...existing,
       ...partial,
       createdAt: existing.createdAt || Date.now(),
-      isLive: false,
+      isLive: partial.isLive !== undefined ? partial.isLive : existing.isLive,
     };
     inMemoryDb.tables.MESSAGES[existingIdx] = updated;
     flushToFile();
@@ -193,8 +200,9 @@ export function updateMessagePartial(id: string, partial: Partial<H2Message>): H
       text: partial.text || "",
       activities: partial.activities || [],
       attachments: partial.attachments,
+      status: partial.status,
+      isLive: partial.isLive !== undefined ? partial.isLive : false,
       createdAt: partial.createdAt || Date.now(),
-      isLive: false,
     };
     inMemoryDb.tables.MESSAGES.push(newMsg);
     flushToFile();
@@ -218,7 +226,7 @@ export function saveAllMessages(messages: H2Message[]): void {
   inMemoryDb.tables.MESSAGES = messages.map((m) => ({
     ...m,
     createdAt: m.createdAt || Date.now(),
-    isLive: false,
+    isLive: m.isLive !== undefined ? m.isLive : false,
   }));
   flushToFile();
 }
