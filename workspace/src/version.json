@@ -1,11 +1,16 @@
 {
-  "version": "1.3.8",
-  "commitMessage": "v1.3.8: Adicionar código de comorbidade (CID-10), grau de risco sistêmico e filtros no diagnóstico dos clientes",
-  "sha": "c743da2",
-  "date": "2025-05-10T17:30:00Z",
+  "version": "1.3.9",
+  "commitMessage": "v1.3.9: Integração completa com Hotmart para assistir vídeos e aulas da plataforma",
+  "sha": "7b8f9e1",
+  "date": "2025-05-10T18:00:00Z",
   "author": "Self Construct Agent",
   "environment": "Produção / Ao vivo",
   "changelog": [
+    {
+      "version": "v1.3.9",
+      "message": "Integração oficial com Hotmart Club: player de vídeo integrado, catálogo de aulas, sincronização de progresso e suporte a links personalizados do Hotmart",
+      "date": "Hoje"
+    },
     {
       "version": "v1.3.8",
       "message": "Adicionar códigos de comorbidade (CID-10) em cada paciente, alertas de risco sistêmico clínico e novos campos no cadastro",
